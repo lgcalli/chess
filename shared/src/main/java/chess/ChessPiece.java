@@ -13,10 +13,20 @@ import java.util.List;
 public class ChessPiece {
     private ChessGame.TeamColor pieceColor_;
     private ChessPiece.PieceType type_;
+    private boolean inOrigPosition;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         pieceColor_ = pieceColor;
         type_ = type;
+        inOrigPosition = true;
+    }
+
+    public boolean getIsOrigPosition() {
+        return this.inOrigPosition;
+    }
+
+    public void setPieceAsMoved() {
+        this.inOrigPosition = false;
     }
 
     /**
@@ -44,6 +54,7 @@ public class ChessPiece {
     public PieceType getPieceType() {
         return this.type_;
     }
+
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
@@ -57,20 +68,10 @@ public class ChessPiece {
         int column = myPosition.getColumn();
         switch(type_){
             case KING:
-                for (int r = row - 1; r <= row + 1 && r <= 8; r++){
-                        if (r <= 0) break;
-                    for (int c = column - 1; c <= column + 1 && c <= 8; c++){
-                        if (c <= 0) break;
-                        if (r == row && c == column) continue;
-                        ChessPosition y = new ChessPosition(r, c);
-                        ChessPiece x = board.getPiece(y);
-                        if (x == null){
-                            validPositions.add(new ChessPosition(r, c));
-                        }
-                    }
-                }
+                validPositions = surroundingSpacesMove(board, validPositions, row, column);
                 break;
             case QUEEN:
+                validPositions = surroundingSpacesMove(board, validPositions, row, column);
                 validPositions = diagonalMove(board, validPositions, row, column);
                 validPositions = straightMove(board, validPositions, row, column);
                 break;
@@ -78,30 +79,89 @@ public class ChessPiece {
                 validPositions = diagonalMove(board, validPositions, row, column);
                 break;
             case KNIGHT:
-                //L shape
-                //if null add
-                //if not null check color
+                jumpCheck(board, validPositions, row + 1, column + 2);
+                jumpCheck(board, validPositions, row - 1, column + 2);
+                jumpCheck(board, validPositions, row + 1, column - 2);
+                jumpCheck(board, validPositions, row - 1, column - 2);
+
+                jumpCheck(board, validPositions, row + 2, column + 1);
+                jumpCheck(board, validPositions, row + 2, column - 1);
+                jumpCheck(board, validPositions, row - 2, column + 1);
+                jumpCheck(board, validPositions, row - 2, column - 1);
                 break;
             case ROOK:
                 validPositions = straightMove(board, validPositions, row, column);
                 break;
             case PAWN:
-                //move forward 1 square unless occupied (unless at beginning and it hasn't been moved yet)
-                //can move diagonally to capture
-                //when they get to other side, they can get promoted to any other type (can't staying as pawn)
+                ChessPosition y = new ChessPosition(row + 1, column);
+                ChessPiece x = board.getPiece(y);
+                if (x == null){
+                    validPositions.add(y);
+                }
+                if (getIsOrigPosition()) {
+                    y = new ChessPosition(row + 2, column);
+                    x = board.getPiece(y);
+                    if (x == null){
+                        validPositions.add(y);
+                    }
+                }
+                y = new ChessPosition(row + 1, column + 1);
+                x = board.getPiece(y);
+                if (x != null && x.pieceColor_ != getTeamColor()){
+                    validPositions.add(y);
+                }
+                y = new ChessPosition(row + 1, column - 1);
+                x = board.getPiece(y);
+                if (x != null && x.pieceColor_ != getTeamColor()){
+                    validPositions.add(y);
+                }
                 break;
             default:
                 break;
         }
         Collection<ChessMove> validMoves = new ArrayList<ChessMove>();
         for (int i = 0; i < validPositions.size(); i++){
-            //**check if there is a rook promotion
-
-            //validMoves.add(new ChessMove(myPosition, validPosition[i], ))
+            if (type_ == PieceType.PAWN){
+                //**check if there is a pawn promotion???
+                validMoves.add(new ChessMove(myPosition, validPositions.get(i), null));
+            } else {
+                validMoves.add(new ChessMove(myPosition, validPositions.get(i), null));
+            }
         }
         return validMoves;
     }
-    public List straightMove (ChessBoard cb, List<ChessPosition> list, int row, int column) {
+
+    public List <ChessPosition> jumpCheck (ChessBoard cb, List<ChessPosition> list, int r, int c) {
+        ChessPosition y = new ChessPosition(r, c);
+        ChessPiece x = cb.getPiece(y);
+        if (x == null || x.pieceColor_ != getTeamColor()) list.add(y);
+        return list;
+    }
+
+    public List <ChessPosition> surroundingSpacesMove (ChessBoard cb, List<ChessPosition> list, int row, int column){
+        for (int r = row - 1; r <= row + 1 && r <= 8; r++){
+            if (r <= 0) break;
+            for (int c = column - 1; c <= column + 1 && c <= 8; c++){
+                if (c <= 0) break;
+                if (r == row && c == column) continue;
+                ChessPosition y = new ChessPosition(r, c);
+                ChessPiece x = cb.getPiece(y);
+                if (x == null){
+                    list.add(new ChessPosition(r, c));
+                } else if (x.pieceColor_ != getTeamColor()){
+                    list.add(new ChessPosition(r, c));
+                }
+            }
+        }
+        return list;
+    }
+
+    public List <ChessPosition> straightMove (ChessBoard cb, List<ChessPosition> list, int row, int column) {
+        /*        |
+                  |
+          - - - - + - - - -
+                  |
+                  |         */
         //checking the columns farther than the column index on the same row
         //column + 1, increasing till we get to the end of the board
         for (int c = column + 1; c <= 8; c++) {
@@ -114,8 +174,10 @@ public class ChessPiece {
                 list.add(new ChessPosition(row, c));
             }
             //if there is a piece and that piece is on the opposite team, add the position
+            //also break (no position past this point can be valid because there aren't jumps for a straight line move)
             else if (x.pieceColor_ != getTeamColor()) {
                 list.add(new ChessPosition(row, c));
+                break;
             }
             //else, the piece is yours, break the loop
             //(no position past this point can be valid because there aren't jumps for a straight line move)
@@ -137,6 +199,7 @@ public class ChessPiece {
             //if there is a piece and that piece is on the opposite team, add the position
             else if (x.pieceColor_ != getTeamColor()) {
                 list.add(new ChessPosition(row, c));
+                break;
             }
             //else, the piece is yours, break the loop
             //(no position past this point can be valid because there aren't jumps for a straight line move)
@@ -157,8 +220,8 @@ public class ChessPiece {
             }
             //if there is a piece and that piece is on the opposite team, add the position
             else if (x.pieceColor_ != getTeamColor()) {
-                //taking opponent
                 list.add(new ChessPosition(r, column));
+                break;
             }
             //else, the piece is yours, break the loop
             //(no position past this point can be valid because there aren't jumps for a straight line move)
@@ -179,8 +242,8 @@ public class ChessPiece {
             }
             //if there is a piece and that piece is on the opposite team, add the position
             else if (x.pieceColor_ != getTeamColor()) {
-                //taking opponent
                 list.add(new ChessPosition(row, column));
+                break;
             }
             //else, the piece is yours, break the loop
             //(no position past this point can be valid because there aren't jumps for a straight line move)
@@ -192,34 +255,39 @@ public class ChessPiece {
         return list;
     }
 
-    public List diagonalMove (ChessBoard cb, List<ChessPosition> list, int row, int column) {
-        //need to check for people in squares
-
+    public List <ChessPosition> diagonalMove (ChessBoard cb, List<ChessPosition> list, int row, int column) {
+         /*        \   /
+                    \ /
+                     x
+                    / \
+                   /   \         */
+        //passthroughs is identified for purposes of increasing every column/row to keep diagonal
         int passthroughs = 0;
-        for (int r = row; r <= 8; r++){
+        //row starts at current row and increases till we get to the end of the board
+        for (int r = row + 1; r <= 8; r++){
             passthroughs++;
-            if ((column + passthroughs) > 8 | (column - passthroughs) < 0) {
-                break;
-            }
-            if (column - passthroughs != column | r != row){
+            //rows increase as columns increase to get diagonal 'x' pattern
+            if (column - passthroughs > 0){
                 ChessPosition y = new ChessPosition(r, column - passthroughs);
                 ChessPiece x = cb.getPiece(y);
                 if (x == null){
                     list.add(new ChessPosition(row, column));
                 } else if (x.pieceColor_ != getTeamColor()) {
                     list.add(new ChessPosition(row, column));
+                    break;
                 } else {
                     break;
                 }
                 list.add(y);
             }
-            if (column + passthroughs != column | r != row) {
+            if (column + passthroughs <= 8) {
                 ChessPosition y = new ChessPosition(r, column + passthroughs);
                 ChessPiece x = cb.getPiece(y);
                 if (x == null){
                     list.add(new ChessPosition(row, column));
                 } else if (x.pieceColor_ != getTeamColor()) {
                     list.add(new ChessPosition(row, column));
+                    break;
                 } else {
                     break;
                 }
@@ -229,28 +297,27 @@ public class ChessPiece {
         passthroughs = 0;
         for (int r = row; row > 0; r--){
             passthroughs++;
-            if ((column + passthroughs) > 8 | (column - passthroughs) < 0) {
-                break;
-            }
-            if (column - passthroughs != column && r != row){
+            if (column - passthroughs > 0){
                 ChessPosition y = new ChessPosition(r, column - passthroughs);
                 ChessPiece x = cb.getPiece(y);
                 if (x == null){
                     list.add(new ChessPosition(row, column));
                 } else if (x.pieceColor_ != getTeamColor()) {
                     list.add(new ChessPosition(row, column));
+                    break;
                 } else {
                     break;
                 }
                 list.add(y);
             }
-            if (column + passthroughs != column && r != row) {
+            if (column + passthroughs <= 8) {
                 ChessPosition y = new ChessPosition(r, column + passthroughs);
                 ChessPiece x = cb.getPiece(y);
                 if (x == null){
                     list.add(new ChessPosition(row, column));
                 } else if (x.pieceColor_ != getTeamColor()) {
                     list.add(new ChessPosition(row, column));
+                    break;
                 } else {
                     break;
                 }
