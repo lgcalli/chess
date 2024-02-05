@@ -82,25 +82,8 @@ public class ChessBoard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ChessBoard board = (ChessBoard) o;
-        boolean isEqual = true;
-        for (int i = 0; i < 9; i++){
-            for (int j = 0; j < 9; j++){
-                if (squares[i][j] == null || board.squares[i][j] == null){
-                    if (squares[i][j] == null && board.squares[i][j] == null){
-                        continue;
-                    } else{
-                        isEqual = false;
-                        return isEqual;
-                    }
-                } else if (squares[i][j].getPieceType() != board.squares[i][j].getPieceType() || squares[i][j].getTeamColor() != board.squares[i][j].getTeamColor()){
-                   isEqual = false;
-                   return isEqual;
-                }
-            }
-        }
-        return isEqual;
+        if (!(o instanceof ChessBoard board)) return false;
+        return Arrays.deepEquals(squares, board.squares);
     }
 
     @Override
