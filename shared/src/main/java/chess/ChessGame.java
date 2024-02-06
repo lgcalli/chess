@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiConsumer;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -75,6 +74,29 @@ public class ChessGame {
             }
 
         }
+
+        //If changing this position puts the king in danger...make king in danger function
+        //MAKE inCheck function for ChessBoard???
+
+        //Check for Castling
+            /*
+            This is a special move where the King and a Rook move simultaneously. The castling move can only be taken when 4 conditions are met:
+            1. Neither the King nor Rook have moved since the game started
+            2. There are no pieces between the King and the Rook
+            3. The King is not in Check
+            4. Both your Rook and King will be safe after making the move (cannot be captured by any enemy pieces).
+            To Castle, the King moves 2 spaces towards the Rook, and the Rook "jumps" the king moving to the position next to and on the other side of the King. This is represented in a ChessMove as the king moving 2 spaces to the side.
+            */
+
+
+        //Check for En Passant
+            /*
+            This is a special move taken by a Pawn in response to your opponent double moving a Pawn.
+            If your opponent double moves a pawn so it ends next to yours (skipping the position where your pawn could have captured their pawn),
+                then on your immediately following turn your pawn may capture their pawn as if their pawn had only moved 1 square.
+            This is as if your pawn is capturing their pawn mid motion, or In Passing.
+            */
+
         return moves;
     }
 
@@ -93,6 +115,11 @@ public class ChessGame {
             System.out.println("TeamTurn = " + getTeamTurn().toString() + "\nPieceTeam = " + x.getTeamColor());
             throw new InvalidMoveException("Invalid Move: Not your piece");
         } else if (moves.contains(move)){
+            if (isInCheck(getTeamTurn()) && (x.getPieceType() != ChessPiece.PieceType.KING)){
+                //need to fix so it either protects king OR it makes king move
+                new InvalidMoveException("Invalid Move: King in check");
+
+            }
             ChessPiece y = boardUpdate.getPiece(move.getEndPosition());
             boardUpdate.deletePiece(move.getStartPosition());
             if (y != null){
@@ -121,28 +148,20 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        System.out.println(getBoard().toString());
-        if (teamColor == TeamColor.WHITE){
-            Collection <ChessPosition> blackEndPositions = calculateTeamEndPositions(TeamColor.BLACK);
-            ChessPosition king = getBoard().getAllPieceWhite().get(ChessPiece.PieceType.KING);
-            System.out.println("WHITE KING POSITION: " + king.toString());
-            System.out.println("BLACK END POSITIONS: \n" + blackEndPositions.toString());
-            if (blackEndPositions.contains(getBoard().getAllPieceWhite().get(ChessPiece.PieceType.KING))){
+        TeamColor opposingColor = null;
+        if (teamColor == TeamColor.WHITE) {
+            opposingColor = TeamColor.BLACK;
+        }
+        if (teamColor == TeamColor.BLACK) {
+            opposingColor = TeamColor.WHITE;
+        }
 
-                return true;
-            } else {
-                return false;
-            }
-        } else if (teamColor == TeamColor.BLACK){
-            Collection <ChessPosition> whiteEndPositions = calculateTeamEndPositions(TeamColor.WHITE);
-            ChessPosition king = getBoard().getAllPieceBlack().get(ChessPiece.PieceType.KING);
-            System.out.println("BLACK KING POSITION: " + king.toString());
-            System.out.println("WHITE END POSITIONS: \n" + whiteEndPositions.toString());
-            if (whiteEndPositions.contains(getBoard().getAllPieceBlack().get(ChessPiece.PieceType.KING))){
-                return true;
-            } else {
-                return false;
-            }
+        System.out.println(getBoard().toString());
+        Collection<ChessPosition> opposingEndPositions = calculateTeamEndPositions(opposingColor);
+        ChessPosition king = getBoard().getAllPieceColor(teamColor).get(ChessPiece.PieceType.KING);
+
+        if (opposingEndPositions.contains(getBoard().getAllPieceColor(teamColor).get(ChessPiece.PieceType.KING))) {
+            return true;
         } else {
             return false;
         }
@@ -155,23 +174,23 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
+        TeamColor opposingColor = null;
+        if (teamColor == TeamColor.WHITE) {
+            opposingColor = TeamColor.BLACK;
+        }
+        if (teamColor == TeamColor.BLACK) {
+            opposingColor = TeamColor.WHITE;
+        }
         if (!isInCheck(teamColor)) return false;
         AtomicBoolean inCheckMate = new AtomicBoolean(true);
-        if (teamColor == TeamColor.WHITE){
-            ChessPosition x = getBoard().getAllPieceWhite().get(ChessPiece.PieceType.KING);
-            Collection<ChessMove> kingMoves = validMoves (x);
-            Collection <ChessPosition> blackEndPositions = calculateTeamEndPositions(TeamColor.BLACK);
-            if (blackEndPositions.containsAll(kingMoves)) {
-                inCheckMate.set(true);
-            }
-        } else if (teamColor == TeamColor.BLACK){
-            ChessPosition x = getBoard().getAllPieceBlack().get(ChessPiece.PieceType.KING);
-            Collection<ChessMove> kingMoves = validMoves (x);
-            Collection <ChessPosition> whiteEndPositions = calculateTeamEndPositions(TeamColor.WHITE);
-            if (whiteEndPositions.containsAll(kingMoves)) {
-                inCheckMate.set(true);
-            }
+        ChessPosition x = getBoard().getAllPieceColor(teamColor).get(ChessPiece.PieceType.KING);
+        Collection<ChessMove> kingMoves = validMoves (x);
+        Collection <ChessPosition> opposingEndPositions = calculateTeamEndPositions(opposingColor);
+        if (opposingEndPositions.containsAll(kingMoves)) {
+            inCheckMate.set(true);
         }
+
+
         return inCheckMate.get();
     }
 

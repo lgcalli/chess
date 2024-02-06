@@ -38,6 +38,11 @@ public class ChessBoard {
         }
     }
 
+    /**
+     * Adds a chess piece to the chessboard
+     *
+     * @param position where to add the piece to
+     */
     public void deletePiece(ChessPosition position) {
         ChessPiece piece = squares[position.getRow()][position.getColumn()];
         if (piece == null) return;
@@ -49,13 +54,14 @@ public class ChessBoard {
         squares[position.getRow()][position.getColumn()] = null;
     }
 
-    public HashMap<ChessPiece.PieceType, ChessPosition> getAllPieceWhite () {
-        return allPieceWhite;
+    public HashMap<ChessPiece.PieceType, ChessPosition> getAllPieceColor (ChessGame.TeamColor color) {
+        if (color == ChessGame.TeamColor.WHITE){
+            return allPieceWhite;
+        } else {
+            return allPieceBlack;
+        }
     }
 
-    public HashMap<ChessPiece.PieceType, ChessPosition> getAllPieceBlack () {
-        return allPieceBlack;
-    }
 
     /**
      * Gets a chess piece on the chessboard
@@ -119,6 +125,13 @@ public class ChessBoard {
         }
     }
 
+    /*
+    public boolean moveEndangersKing (ChessGame.TeamColor color, ChessMove move){
+
+    }
+
+
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
