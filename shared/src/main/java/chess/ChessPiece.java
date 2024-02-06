@@ -311,25 +311,25 @@ public class ChessPiece {
 
         */
         if (pieceColor == ChessGame.TeamColor.WHITE){
-            System.out.println("1");
+            //System.out.println("1");
             if (row + 1 > 8) return validMoves;
-            System.out.println("2");
+            //System.out.println("2");
             //if the piece is in its starting position
             /*
              ** Adding moves for the piece to go 1 - 2 forward depending on whether  it's blocked
              */
             if (row == 2){
-                System.out.println("3");
+                //System.out.println("3");
                 for (int i = 1; i <= 2; i++){
-                    System.out.println("4");
+                    //System.out.println("4");
                     ChessPosition position = new ChessPosition (row + i, col);
                     ChessPiece piece = board.getPiece(position);
                     if (piece == null){
-                        System.out.println("5");
+                        //System.out.println("5");
                         //if there is nothing in the spot
                         validMoves.add(new ChessMove(myPosition, position, null));
                     } else {
-                        System.out.println("6");
+                        //System.out.println("6");
                         //if the spot has a piece in it
                         break;
                     }
@@ -340,19 +340,19 @@ public class ChessPiece {
              ** Adding move for the piece to go 1 forward depending on whether it's blocked
              */
             else {
-                System.out.println("7");
+                //System.out.println("7");
                 ChessPosition position = new ChessPosition(row + 1, col);
                 ChessPiece piece = board.getPiece(position);
                 if (piece == null) {
-                    System.out.println("8");
+                    //System.out.println("8");
                     if (row + 1 == 8) {
-                        System.out.println("9");
+                        //System.out.println("9");
                         validMoves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
                         validMoves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
                         validMoves.add(new ChessMove(myPosition, position, PieceType.ROOK));
                         validMoves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
                     } else {
-                        System.out.println("10");
+                        //System.out.println("10");
                         validMoves.add(new ChessMove(myPosition, position, null));
                     }
                 }
@@ -363,41 +363,41 @@ public class ChessPiece {
             int col_left = col - 1;
             int col_right = col + 1;
             if (col_left >= 1){
-                System.out.println("11");
+                //System.out.println("11");
                 ChessPosition position = new ChessPosition(row + 1, col_left);
                 ChessPiece piece = board.getPiece(position);
                 if (piece != null){
-                    System.out.println("12");
+                    //System.out.println("12");
                     if (piece.pieceColor == ChessGame.TeamColor.BLACK){
-                        System.out.println("13");
+                        //System.out.println("13");
                         if (row + 1 == 8) {
-                            System.out.println("14");
+                            //System.out.println("14");
                             validMoves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
                             validMoves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
                             validMoves.add(new ChessMove(myPosition, position, PieceType.ROOK));
                             validMoves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
                         } else {
-                            System.out.println("15");
+                            //System.out.println("15");
                             validMoves.add(new ChessMove(myPosition, position, null));
                         }
                     }
                 }
             }
             if (col_right <= 8){
-                System.out.println("16");
+                //System.out.println("16");
                 ChessPosition position = new ChessPosition(row + 1, col_right);
                 ChessPiece piece = board.getPiece(position);
                 if (piece != null){
-                    System.out.println("17");
+                    //System.out.println("17");
                     if (piece.pieceColor == ChessGame.TeamColor.BLACK){
                         if (row + 1 == 8) {
-                            System.out.println("18");
+                            //System.out.println("18");
                             validMoves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
                             validMoves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
                             validMoves.add(new ChessMove(myPosition, position, PieceType.ROOK));
                             validMoves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
                         } else {
-                            System.out.println("19");
+                            //System.out.println("19");
                             validMoves.add(new ChessMove(myPosition, position, null));
                         }
                     }

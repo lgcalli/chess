@@ -2,6 +2,10 @@ package chess;
 
 import java.sql.Array;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -11,8 +15,13 @@ import java.util.Arrays;
  */
 public class ChessBoard {
     private ChessPiece[][] squares = new ChessPiece[9][9];
+    private HashMap <ChessPiece.PieceType, ChessPosition> allPieceBlack;
+    private HashMap <ChessPiece.PieceType, ChessPosition> allPieceWhite;
 
-    public ChessBoard() { }
+    public ChessBoard() {
+        allPieceBlack = new HashMap<>();
+        allPieceWhite = new HashMap<>();
+    }
 
     /**
      * Adds a chess piece to the chessboard
@@ -22,13 +31,31 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         squares[position.getRow()][position.getColumn()] = piece;
+        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+            allPieceWhite.put(piece.getPieceType(), position);
+        } else if (piece.getTeamColor() == ChessGame.TeamColor.BLACK){
+            allPieceBlack.put(piece.getPieceType(), position);
+        }
     }
 
-    /*
-    public void deletePiece(ChessPosition position){
+    public void deletePiece(ChessPosition position) {
+        ChessPiece piece = squares[position.getRow()][position.getColumn()];
+        if (piece == null) return;
+        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+            allPieceWhite.remove(piece.getPieceType(), position);
+        } else if (piece.getTeamColor() == ChessGame.TeamColor.BLACK){
+            allPieceBlack.remove(piece.getPieceType(), position);
+        }
         squares[position.getRow()][position.getColumn()] = null;
     }
-    */
+
+    public HashMap<ChessPiece.PieceType, ChessPosition> getAllPieceWhite () {
+        return allPieceWhite;
+    }
+
+    public HashMap<ChessPiece.PieceType, ChessPosition> getAllPieceBlack () {
+        return allPieceBlack;
+    }
 
     /**
      * Gets a chess piece on the chessboard
@@ -77,6 +104,19 @@ public class ChessBoard {
         squares[8][6] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
         squares[8][7] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
         squares[8][8] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
+
+        for (int i = 0; i < 9; i++){
+            for (int j = 0; j < 9; j++){
+                if (squares[i][j] != null){
+                    if (squares[i][j].getTeamColor() == ChessGame.TeamColor.WHITE){
+                        allPieceWhite.put(squares[i][j].getPieceType(), new ChessPosition(i, j));
+                    }
+                    if (squares[i][j].getTeamColor() == ChessGame.TeamColor.BLACK){
+                        allPieceBlack.put(squares[i][j].getPieceType(), new ChessPosition(i, j));
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -88,39 +128,42 @@ public class ChessBoard {
 
     @Override
     public String toString() {
+        /*
         return "ChessBoard{" +
                 "squares=" + Arrays.toString(squares) +
-                '}';
+                '}'; */
+        return printChessBoard ();
     }
 
-    public void printChessBoard (ChessBoard o) {
-        for (int i = 8; i >= 0; i--){
-            String s = null;
-            for (int j = 0; j < 9; j++){
-                if (((ChessBoard) o).squares[i][j] == null){
+    public String printChessBoard () {
+        String s = "CHESSBOARD \n";
+        for (int i = 8; i >= 1; i--){
+            for (int j = 1; j < 9; j++){
+                if (squares[i][j] == null){
                     s = s + "[ ]";
                 } else {
-                    if (((ChessBoard) o).squares[i][j].getPieceType() == ChessPiece.PieceType.KING){
+                    if (squares[i][j].getPieceType() == ChessPiece.PieceType.KING){
                         s = s + "[K]";
                     }
-                    else if (((ChessBoard) o).squares[i][j].getPieceType() == ChessPiece.PieceType.QUEEN){
+                    else if (squares[i][j].getPieceType() == ChessPiece.PieceType.QUEEN){
                         s = s + "[Q]";
                     }
-                    else if (((ChessBoard) o).squares[i][j].getPieceType() == ChessPiece.PieceType.KNIGHT){
+                    else if (squares[i][j].getPieceType() == ChessPiece.PieceType.KNIGHT){
                         s = s + "[k]";
                     }
-                    else if (((ChessBoard) o).squares[i][j].getPieceType() == ChessPiece.PieceType.ROOK){
+                    else if (squares[i][j].getPieceType() == ChessPiece.PieceType.ROOK){
                         s = s + "[r]";
                     }
-                    else if (((ChessBoard) o).squares[i][j].getPieceType() == ChessPiece.PieceType.BISHOP){
+                    else if (squares[i][j].getPieceType() == ChessPiece.PieceType.BISHOP){
                         s = s + "[B]";
                     }
-                    else if (((ChessBoard) o).squares[i][j].getPieceType() == ChessPiece.PieceType.PAWN){
+                    else if (squares[i][j].getPieceType() == ChessPiece.PieceType.PAWN){
                         s = s + "[P]";
                     }
                 }
             }
-            System.out.println(s);
+            s = s + '\n';
         }
+        return s;
     }
 }
