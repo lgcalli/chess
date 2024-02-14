@@ -19,9 +19,16 @@ public class ChessBoard {
     private HashMap <ChessPiece.PieceType, ChessPosition> allPieceWhite;
 
     public ChessBoard() {
+        //positions maps
         allPieceBlack = new HashMap<>();
         allPieceWhite = new HashMap<>();
+        //moves maps
     }
+
+    //functions that calculates team start positions, team end positions, and team moves
+    //function that checks if the BOARD is in check for a specific team
+    // 
+
 
     /**
      * Adds a chess piece to the chessboard
@@ -52,6 +59,22 @@ public class ChessBoard {
             allPieceBlack.remove(piece.getPieceType(), position);
         }
         squares[position.getRow()][position.getColumn()] = null;
+    }
+
+    ChessBoard moveAction (ChessMove move) {
+        ChessPiece x = getPiece(move.getStartPosition());
+        ChessPiece y = this.getPiece(move.getEndPosition());
+        ChessBoard board = this;
+        board.deletePiece(move.getStartPosition());
+        if (y != null){
+            board.deletePiece(move.getEndPosition());
+        }
+        if (move.getPromotionPiece() != null){
+            board.addPiece(move.getEndPosition(), new ChessPiece(x.getTeamColor(), move.getPromotionPiece()));
+        } else {
+            board.addPiece(move.getEndPosition(), x);
+        }
+        return board;
     }
 
     public HashMap<ChessPiece.PieceType, ChessPosition> getAllPieceColor (ChessGame.TeamColor color) {

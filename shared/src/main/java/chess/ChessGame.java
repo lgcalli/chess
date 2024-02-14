@@ -74,6 +74,10 @@ public class ChessGame {
             }
 
         }
+        if (isInCheck(getTeamTurn()) && (x.getPieceType() != ChessPiece.PieceType.KING)){
+            //need to fix so it protects king
+
+        }
 
         //If changing this position puts the king in danger...make king in danger function
         //MAKE inCheck function for ChessBoard???
@@ -109,28 +113,14 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         Collection <ChessMove> moves = validMoves(move.getStartPosition());
         System.out.println(moves.toString());
-        ChessBoard boardUpdate = getBoard();
-        ChessPiece x = boardUpdate.getPiece(move.getStartPosition());
+        ChessPiece x = board.getPiece(move.getStartPosition());
         if (x.getTeamColor() != getTeamTurn()) {
             System.out.println("TeamTurn = " + getTeamTurn().toString() + "\nPieceTeam = " + x.getTeamColor());
             throw new InvalidMoveException("Invalid Move: Not your piece");
         } else if (moves.contains(move)){
-            if (isInCheck(getTeamTurn()) && (x.getPieceType() != ChessPiece.PieceType.KING)){
-                //need to fix so it either protects king OR it makes king move
-                new InvalidMoveException("Invalid Move: King in check");
-
-            }
-            ChessPiece y = boardUpdate.getPiece(move.getEndPosition());
-            boardUpdate.deletePiece(move.getStartPosition());
-            if (y != null){
-                boardUpdate.deletePiece(move.getEndPosition());
-            }
-            if (move.getPromotionPiece() != null){
-                boardUpdate.addPiece(move.getEndPosition(), new ChessPiece(x.getTeamColor(), move.getPromotionPiece()));
-            } else {
-                boardUpdate.addPiece(move.getEndPosition(), x);
-            }
-            setBoard(boardUpdate);
+            ChessBoard updateBoard = board;
+            updateBoard.moveAction(move);
+            setBoard(updateBoard);
         } else {
             throw new InvalidMoveException("Invalid Move: Piece not able to move to chosen position");
         }
@@ -155,11 +145,8 @@ public class ChessGame {
         if (teamColor == TeamColor.BLACK) {
             opposingColor = TeamColor.WHITE;
         }
-
         System.out.println(getBoard().toString());
         Collection<ChessPosition> opposingEndPositions = calculateTeamEndPositions(opposingColor);
-        ChessPosition king = getBoard().getAllPieceColor(teamColor).get(ChessPiece.PieceType.KING);
-
         if (opposingEndPositions.contains(getBoard().getAllPieceColor(teamColor).get(ChessPiece.PieceType.KING))) {
             return true;
         } else {
@@ -186,7 +173,7 @@ public class ChessGame {
         ChessPosition x = getBoard().getAllPieceColor(teamColor).get(ChessPiece.PieceType.KING);
         Collection<ChessMove> kingMoves = validMoves (x);
         Collection <ChessPosition> opposingEndPositions = calculateTeamEndPositions(opposingColor);
-        if (opposingEndPositions.containsAll(kingMoves)) {
+        if (kingMoves.containsAll(opposingEndPositions)) {
             inCheckMate.set(true);
         }
 
