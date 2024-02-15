@@ -62,7 +62,6 @@ public class ChessGame {
         if (board.getPiece(startPosition) == null) return null;
         TeamColor teamColor = board.getPiece(startPosition).getTeamColor();
         Collection <ChessMove> moves = board.getPiece(startPosition).pieceMoves(board, startPosition);
-        Collection <ChessMove> returnMoves = moves;
         moves.removeIf(chessMove -> {
             System.out.println("Is  --- " + chessMove.toString() + " ---  a valid Move?");
             return board.movePutsBoardInCheck(chessMove, teamColor);
@@ -89,8 +88,6 @@ public class ChessGame {
                 then on your immediately following turn your pawn may capture their pawn as if their pawn had only moved 1 square.
             This is as if your pawn is capturing their pawn mid motion, or In Passing.
             */
-
-
 
     }
 
@@ -119,6 +116,7 @@ public class ChessGame {
         } else if (getTeamTurn() == TeamColor.BLACK) {
             setTeamTurn(TeamColor.WHITE);
         }
+        board.updateColorMaps();
     }
 
     /**
@@ -147,12 +145,25 @@ public class ChessGame {
         }
         if (!isInCheck(teamColor)) return false;
         AtomicBoolean inCheckMate = new AtomicBoolean(true);
-        ChessPosition x = getBoard().getAllPieceColor(teamColor).get(ChessPiece.PieceType.KING);
-        Collection<ChessMove> kingMoves = validMoves(x);
+
+
+        ChessPosition kingPos = getBoard().getAllPieceColorIndividualByType(ChessPiece.PieceType.KING, teamColor);
+        Collection<ChessMove> kingMoves = validMoves(kingPos);
+        Collection<ChessPosition> kingEndPositions = new HashSet<>();
+        if (!kingMoves.isEmpty()) {
+            kingMoves.forEach(chessMove -> {
+                kingEndPositions.add(chessMove.getEndPosition());
+            });
+        }
         Collection <ChessPosition> opposingEndPositions = board.calculateTeamEndPositions(opposingColor);
-        if (kingMoves.containsAll(opposingEndPositions)) {
+        if (kingEndPositions == null){
+            if (isInCheck(teamColor)) inCheckMate.set(true);
+            else inCheckMate.set(false);
+        } else if (kingEndPositions.containsAll(opposingEndPositions)) {
             inCheckMate.set(true);
         }
+        if (inCheckMate.get()) return inCheckMate.get();
+
         return inCheckMate.get();
     }
 
@@ -190,6 +201,7 @@ public class ChessGame {
      */
     public void setBoard(ChessBoard board) {
         this.board = board;
+        this.board.updateColorMaps();
     }
 
     /**
@@ -200,7 +212,6 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return this.board;
     }
-
 
     @Override
     public boolean equals(Object o) {

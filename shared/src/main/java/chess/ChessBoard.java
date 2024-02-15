@@ -1,11 +1,7 @@
 package chess;
 
-import java.lang.Cloneable;
-import java.sql.Array;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
@@ -16,10 +12,14 @@ import java.util.HashSet;
  */
 public class ChessBoard {
     private ChessPiece[][] squares = new ChessPiece[9][9];
-    private HashMap <ChessPiece.PieceType, ChessPosition> allPieceBlack;
-    private HashMap <ChessPiece.PieceType, ChessPosition> allPieceWhite;
+
+    private HashMap <ChessPiece.PieceType, HashSet <ChessPosition>> allPieceBlack;
+    private HashMap <ChessPiece.PieceType, HashSet <ChessPosition>> allPieceWhite;
 
     public ChessBoard() {
+        //
+
+        //
         allPieceBlack = new HashMap<>();
         allPieceWhite = new HashMap<>();
         updateColorMaps();
@@ -34,11 +34,8 @@ public class ChessBoard {
     public void addPiece(ChessPosition position, ChessPiece piece) {
         if (piece == null) return;
         squares[position.getRow()][position.getColumn()] = piece;
-        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE){
-            allPieceWhite.put(piece.getPieceType(), position);
-        } else if (piece.getTeamColor() == ChessGame.TeamColor.BLACK){
-            allPieceBlack.put(piece.getPieceType(), position);
-        }
+        addAllPieceColorListByType(piece, position, piece.getTeamColor());
+
     }
 
     /**
@@ -49,11 +46,7 @@ public class ChessBoard {
     public void deletePiece(ChessPosition position) {
         ChessPiece piece = squares[position.getRow()][position.getColumn()];
         if (piece == null) return;
-        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE){
-            allPieceWhite.remove(piece.getPieceType(), position);
-        } else if (piece.getTeamColor() == ChessGame.TeamColor.BLACK){
-            allPieceBlack.remove(piece.getPieceType(), position);
-        }
+        deleteAllPieceColorListByType(piece, position, piece.getTeamColor());
         squares[position.getRow()][position.getColumn()] = null;
     }
 
@@ -125,7 +118,7 @@ public class ChessBoard {
         }
         //System.out.println(this.toString());
         Collection<ChessPosition> opposingEndPositions = this.calculateTeamEndPositions(opposingColor);
-        if (opposingEndPositions.contains(this.getAllPieceColor(teamColor).get(ChessPiece.PieceType.KING))) {
+        if (opposingEndPositions.contains(getAllPieceColorIndividualByType(ChessPiece.PieceType.KING, teamColor))){
             System.out.println("yes");
             //System.out.println(opposingEndPositions.toString());
             //System.out.println("King position = " + this.getAllPieceColor(teamColor).get(ChessPiece.PieceType.KING).toString());
@@ -140,45 +133,71 @@ public class ChessBoard {
 
     public Collection <ChessPosition> calculateTeamStartPositions (ChessGame.TeamColor x){
         Collection<ChessPosition> positions = new HashSet<>();
-        HashMap <ChessPosition, Collection <ChessMove>> y = calculateTeamMovesMap (x);
-        y.forEach((ChessPosition, ChessMoveDataSet) -> {
-            ChessMoveDataSet.forEach ((ChessMove) -> {
-                positions.add(ChessMove.getStartPosition());
-            });
+        HashSet <ChessMove> teamMovesSet = calculateTeamMovesSet (x);
+        teamMovesSet.forEach(chessMove -> {
+            positions.add(chessMove.getStartPosition());
         });
         return positions;
     }
 
     public Collection<ChessPosition> calculateTeamEndPositions (ChessGame.TeamColor x) {
         Collection<ChessPosition> positions = new HashSet<>();
-        HashMap <ChessPosition, Collection <ChessMove>> y = calculateTeamMovesMap (x);
-        y.forEach((ChessPosition, ChessMoveDataSet) -> {
-            ChessMoveDataSet.forEach ((ChessMove) -> {
-                positions.add(ChessMove.getEndPosition());
-            });
+        HashSet <ChessMove> teamMovesSet = calculateTeamMovesSet (x);
+        teamMovesSet.forEach(chessMove -> {
+            positions.add(chessMove.getEndPosition());
         });
         return positions;
     }
 
-    public HashMap <ChessPosition, Collection <ChessMove>> calculateTeamMovesMap (ChessGame.TeamColor x) {
-        HashMap <ChessPosition, Collection <ChessMove>> moves = new HashMap<>();
+    public HashSet <ChessMove> calculateTeamMovesSet (ChessGame.TeamColor x) {
+        HashSet <ChessMove> moves = new HashSet<>();
         for (int i = 0; i < 9; i++){
             for (int j = 0; j < 9; j++){
                 ChessPosition position = new ChessPosition (i, j);
                 if (this.getPiece(position) != null && this.getPiece(position).getTeamColor() == x){
                     Collection <ChessMove> validChessMoves = this.getPiece(position).pieceMoves(this, position);
-                    moves.put(position, validChessMoves);
+                    validChessMoves.forEach(chessMove -> {
+                        moves.add (chessMove);
+                    });
                 }
             }
         }
         return moves;
     }
 
-    public HashMap<ChessPiece.PieceType, ChessPosition> getAllPieceColor (ChessGame.TeamColor color) {
+    public HashSet<ChessPosition> getAllPieceColorListByType (ChessPiece.PieceType pieceType, ChessGame.TeamColor color) {
         if (color == ChessGame.TeamColor.WHITE){
-            return allPieceWhite;
+            return allPieceWhite.get(pieceType);
         } else {
-            return allPieceBlack;
+            return allPieceBlack.get(pieceType);
+        }
+    }
+
+    public ChessPosition getAllPieceColorIndividualByType (ChessPiece.PieceType pieceType, ChessGame.TeamColor color) {
+        HashSet<ChessPosition> newSet = getAllPieceColorListByType(pieceType, color);
+        if (newSet == null) return null;
+        return newSet.stream().toList().getFirst();
+    }
+
+    public void addAllPieceColorListByType (ChessPiece piece, ChessPosition position, ChessGame.TeamColor color) {
+        HashSet <ChessPosition> newSet = this.getAllPieceColorListByType(piece.getPieceType(),color);
+        if (newSet == null) newSet = new HashSet<>();
+        else newSet.add(position);
+        if (color == ChessGame.TeamColor.WHITE){
+            allPieceWhite.put(piece.getPieceType(), newSet);
+        } else {
+            allPieceBlack.put(piece.getPieceType(), newSet);
+        }
+    }
+
+    public void deleteAllPieceColorListByType (ChessPiece piece, ChessPosition position, ChessGame.TeamColor color) {
+        HashSet <ChessPosition> newSet = this.getAllPieceColorListByType(piece.getPieceType(),color);
+        if (newSet == null) return;
+        else newSet.remove(position);
+        if (color == ChessGame.TeamColor.WHITE){
+            allPieceWhite.put(piece.getPieceType(), newSet);
+        } else {
+            allPieceBlack.put(piece.getPieceType(), newSet);
         }
     }
 
@@ -187,10 +206,11 @@ public class ChessBoard {
             for (int j = 0; j < 9; j++){
                 if (squares[i][j] != null){
                     if (squares[i][j].getTeamColor() == ChessGame.TeamColor.WHITE){
-                        allPieceWhite.put(squares[i][j].getPieceType(), new ChessPosition(i, j));
+                        addAllPieceColorListByType(squares[i][j], new ChessPosition(i, j), ChessGame.TeamColor.WHITE);
                     }
                     if (squares[i][j].getTeamColor() == ChessGame.TeamColor.BLACK){
-                        allPieceBlack.put(squares[i][j].getPieceType(), new ChessPosition(i, j));
+                        addAllPieceColorListByType(squares[i][j], new ChessPosition(i, j), ChessGame.TeamColor.BLACK);
+
                     }
                 }
             }
@@ -246,18 +266,7 @@ public class ChessBoard {
         squares[8][7] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
         squares[8][8] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
 
-        for (int i = 0; i < 9; i++){
-            for (int j = 0; j < 9; j++){
-                if (squares[i][j] != null){
-                    if (squares[i][j].getTeamColor() == ChessGame.TeamColor.WHITE){
-                        allPieceWhite.put(squares[i][j].getPieceType(), new ChessPosition(i, j));
-                    }
-                    if (squares[i][j].getTeamColor() == ChessGame.TeamColor.BLACK){
-                        allPieceBlack.put(squares[i][j].getPieceType(), new ChessPosition(i, j));
-                    }
-                }
-            }
-        }
+        updateColorMaps();
     }
 
     /*
