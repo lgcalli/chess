@@ -112,7 +112,7 @@ public class ChessGame {
             updateBoard.moveAction(move);
             setBoard(updateBoard);
         } else {
-           // throw new InvalidMoveException("Invalid Move: Piece not able to move to chosen position");
+           throw new InvalidMoveException("Invalid Move: Piece not able to move to chosen position");
         }
         if (getTeamTurn() == TeamColor.WHITE){
             setTeamTurn(TeamColor.BLACK);
