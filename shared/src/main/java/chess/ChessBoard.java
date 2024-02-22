@@ -12,18 +12,17 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ChessBoard {
     private ChessPiece[][] squares = new ChessPiece[9][9];
-
     private HashMap <ChessPiece.PieceType, HashSet <ChessPosition>> allPieceBlack;
     private HashMap <ChessPiece.PieceType, HashSet <ChessPosition>> allPieceWhite;
 
-    public ChessBoard() {
-        //
 
-        //
+    public ChessBoard() {
         allPieceBlack = new HashMap<>();
         allPieceWhite = new HashMap<>();
+
         updateColorMaps();
     }
+
 
     /**
      * Adds a chess piece to the chessboard
@@ -35,7 +34,6 @@ public class ChessBoard {
         if (piece == null) return;
         squares[position.getRow()][position.getColumn()] = piece;
         addAllPieceColorListByType(piece, position, piece.getTeamColor());
-
     }
 
     /**
@@ -64,6 +62,49 @@ public class ChessBoard {
         }
     }
 
+    void undoMoveAction (ChessPiece x, ChessPiece y, ChessMove move) {
+        deletePiece(move.getEndPosition());
+        if (y != null){
+            addPiece(move.getEndPosition(), y);
+        }
+        addPiece(move.getStartPosition(), x);
+    }
+
+    void swapAction (ChessMove move) {
+        ChessPiece x = getPiece(move.getStartPosition());
+        ChessPiece y = this.getPiece(move.getEndPosition());
+        deletePiece(move.getStartPosition());
+        if (y != null){
+            deletePiece(move.getEndPosition());
+            deletePiece(move.getStartPosition());
+            addPiece(move.getEndPosition(), x);
+            addPiece(move.getStartPosition(), y);
+        } else return;
+    }
+
+    boolean movePutsPieceInDanger (ChessMove move, ChessGame.TeamColor teamColor){
+        boolean returnValue = false;
+        ChessPiece x = getPiece(move.getStartPosition());
+        ChessPiece y = this.getPiece(move.getEndPosition());
+        ChessGame.TeamColor enemyColor = null ;
+        if (teamColor == ChessGame.TeamColor.WHITE) enemyColor = ChessGame.TeamColor.BLACK;
+        if (teamColor == ChessGame.TeamColor.BLACK) enemyColor = ChessGame.TeamColor.WHITE;
+
+        if (!move.getIsSwap()) {
+            moveAction(move);
+            Collection <ChessPosition> endPositions = this.calculateTeamEndPositions(enemyColor);
+            if (endPositions.contains(move.getStartPosition())) returnValue = true;
+            undoMoveAction(x, y, move);
+        } else {
+            swapAction(move);
+            Collection <ChessPosition> endPositions = this.calculateTeamEndPositions(enemyColor);
+            if (endPositions.contains(move.getStartPosition())) returnValue = true;
+            swapAction (new ChessMove(move.getEndPosition(), move.getStartPosition(), move.getPromotionPiece()));
+        }
+
+        return returnValue;
+    }
+
 
     boolean movePutsBoardInCheck (ChessMove move, ChessGame.TeamColor teamColor) {
         //System.out.println("Before Move");
@@ -72,15 +113,7 @@ public class ChessBoard {
         boolean returnValue;
         ChessPiece x = getPiece(move.getStartPosition());
         ChessPiece y = this.getPiece(move.getEndPosition());
-        deletePiece(move.getStartPosition());
-        if (y != null){
-            deletePiece(move.getEndPosition());
-        }
-        if (move.getPromotionPiece() != null){
-            addPiece(move.getEndPosition(), new ChessPiece(x.getTeamColor(), move.getPromotionPiece()));
-        } else {
-            addPiece(move.getEndPosition(), x);
-        }
+        moveAction(move);
         if (boardInCheck(teamColor)) {
             //System.out.println("No, in check...removing move: " + move.toString());
             //moves.remove(chessMove);
@@ -95,17 +128,16 @@ public class ChessBoard {
         //System.out.println("After Move");
         //System.out.println(this.toString());
 
-        deletePiece(move.getEndPosition());
-        if (y != null){
-            addPiece(move.getEndPosition(), y);
-        }
-        addPiece(move.getStartPosition(), x);
+
+        undoMoveAction(x, y, move);
 
         //System.out.println("After Reset");
         //System.out.println(this.toString());
 
         return returnValue;
     }
+
+
 
     boolean boardInCheck (ChessGame.TeamColor teamColor) {
         //System.out.println("\n----- In Check?");
@@ -119,13 +151,13 @@ public class ChessBoard {
         //System.out.println(this.toString());
         Collection<ChessPosition> opposingEndPositions = this.calculateTeamEndPositions(opposingColor);
         if (opposingEndPositions.contains(getAllPieceColorIndividualByType(ChessPiece.PieceType.KING, teamColor))){
-            System.out.println("yes");
+            //System.out.println("yes");
             //System.out.println(opposingEndPositions.toString());
             //System.out.println("King position = " + this.getAllPieceColor(teamColor).get(ChessPiece.PieceType.KING).toString());
             //System.out.println("\n-----");
             return true;
         } else {
-            System.out.println("nope");
+            //System.out.println("nope");
             //System.out.println("\n-----");
             return false;
         }

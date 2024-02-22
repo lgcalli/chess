@@ -12,12 +12,22 @@ public class ChessMove {
     private ChessPosition startPosition_;
     private ChessPosition endPosition_;
     private ChessPiece.PieceType promotionPiece_;
+    boolean isSwap;
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
         startPosition_ = startPosition;
         endPosition_ = endPosition;
         promotionPiece_ = promotionPiece;
+        isSwap = false;
+    }
+
+    public void setIsSwap (boolean x){
+        this.isSwap = x;
+    }
+
+    public boolean getIsSwap () {
+        return this.isSwap;
     }
 
     /**

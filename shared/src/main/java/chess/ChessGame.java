@@ -1,4 +1,5 @@
 package chess;
+import javax.xml.transform.stax.StAXResult;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -49,6 +50,48 @@ public class ChessGame {
         BLACK
     }
 
+    public boolean castlingCheckMove (ChessMove move) {
+        boolean hasMoved = board.getPiece(move.getStartPosition()).getPieceStatus();
+        if (hasMoved) return true;
+        if (move.getEndPosition() == null || move.getStartPosition() == null) return true;
+        ChessPiece piece = board.getPiece(move.getEndPosition());
+        if (piece == null) return true;
+        hasMoved = piece.getPieceStatus();
+        if (hasMoved) return true;
+        ChessPosition chessPosition = move.getEndPosition();
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition kingPos = board.getAllPieceColorIndividualByType(ChessPiece.PieceType.KING, board.getPiece(move.getStartPosition()).getTeamColor());
+        if (board.getPiece(chessPosition).getPieceStatus()) return true;
+        ChessMove x = new ChessMove(startPosition, chessPosition, null);
+        x.setIsSwap(true);
+        if (board.movePutsBoardInCheck(x, board.getPiece(startPosition).getTeamColor())) return true;
+        if (board.movePutsPieceInDanger(x, board.getPiece(startPosition).getTeamColor())) return true;
+        if (kingPos.getColumn() == chessPosition.getColumn()) {
+            if (kingPos.getRow() < chessPosition.getRow()) {
+                for (int i = kingPos.getRow() + 1; i < chessPosition.getRow(); i++){
+                    if (board.getPiece(new ChessPosition(i, kingPos.getColumn())) != null) return true;
+                }
+            } else if (kingPos.getRow() > chessPosition.getRow()) {
+                for (int i = chessPosition.getRow() + 1; i < kingPos.getRow(); i++){
+                    if (board.getPiece(new ChessPosition(i, kingPos.getColumn())) != null) return true;
+                }
+            } else return true;
+        } else if (kingPos.getRow() == chessPosition.getRow()){
+            if (kingPos.getColumn() < chessPosition.getColumn()){
+                for (int i = kingPos.getColumn() + 1; i < chessPosition.getColumn(); i++){
+                    if (board.getPiece(new ChessPosition(kingPos.getRow(), i)) != null) return true;
+                }
+            } else if (kingPos.getColumn() > chessPosition.getColumn()){
+                for (int i = chessPosition.getColumn() + 1; i < kingPos.getColumn(); i++){
+                    if (board.getPiece(new ChessPosition(kingPos.getRow(), i)) != null) return true;
+                }
+            } else return true;
+        } else {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Gets a valid moves for a piece at the given location
      *
@@ -57,18 +100,15 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        System.out.println("Checking Valid Moves for Board:");
+        //System.out.println("Checking Valid Moves for Board:");
         System.out.println(board.toString());
         if (board.getPiece(startPosition) == null) return null;
         TeamColor teamColor = board.getPiece(startPosition).getTeamColor();
         Collection <ChessMove> moves = board.getPiece(startPosition).pieceMoves(board, startPosition);
         moves.removeIf(chessMove -> {
-            System.out.println("Is  --- " + chessMove.toString() + " ---  a valid Move?");
+            //System.out.println("Is  --- " + chessMove.toString() + " ---  a valid Move?");
             return board.movePutsBoardInCheck(chessMove, teamColor);
         });
-
-        //System.out.println(board.toString());
-        return moves;
 
         //Check for Castling
             /*
@@ -79,6 +119,47 @@ public class ChessGame {
             4. Both your Rook and King will be safe after making the move (cannot be captured by any enemy pieces).
             To Castle, the King moves 2 spaces towards the Rook, and the Rook "jumps" the king moving to the position next to and on the other side of the King. This is represented in a ChessMove as the king moving 2 spaces to the side.
             */
+        /*
+        ChessPosition kingPos = board.getAllPieceColorIndividualByType(ChessPiece.PieceType.KING, getTeamTurn());
+        ChessPiece x = board.getPiece(startPosition);
+        ChessPiece.PieceType type = x.getPieceType();
+        boolean hasMoved = true;
+        if (x != null) {
+            hasMoved = x.getPieceStatus();
+        }
+        if (!hasMoved && !isInCheck(getTeamTurn()) && (type == ChessPiece.PieceType.ROOK || type == ChessPiece.PieceType.KING)){
+            if (type == ChessPiece.PieceType.KING) {
+                HashSet<ChessPosition> allRooks = board.getAllPieceColorListByType(ChessPiece.PieceType.ROOK, getTeamTurn());
+                if (allRooks == null) allRooks = new HashSet<>();
+                allRooks.removeIf(chessPosition -> {
+                    ChessMove move = new ChessMove(kingPos, chessPosition ,null);
+                    move.setIsSwap(true);
+                    return castlingCheckMove(move);
+                });
+                if (!allRooks.isEmpty()){
+                    allRooks.forEach(chessPosition -> {
+                        ChessMove move = new ChessMove(kingPos, chessPosition ,null);
+                        move.setIsSwap(true);
+                        moves.add(move);
+                        ChessMove move_ = new ChessMove(chessPosition, kingPos ,null);
+                        move_.setIsSwap(true);
+                        moves.add(move_);
+                        System.out.println("CASTLING MOVES ADDED:\n" + move.toString() + "\n" + move_.toString());
+                    });
+                }
+            } else {
+                ChessMove move = new ChessMove(startPosition, kingPos, null);
+                move.setIsSwap(true);
+                ChessMove move_ = new ChessMove(kingPos, startPosition, null);
+                move.setIsSwap(true);
+                if (!castlingCheckMove(move)){
+                    moves.add(move);
+                    moves.add(move_);
+                    System.out.println("CASTLING MOVES ADDED:\n" + move.toString() + "\n" + move_.toString());
+                }
+            }
+        }
+        */
 
 
         //Check for En Passant
@@ -87,7 +168,13 @@ public class ChessGame {
             If your opponent double moves a pawn so it ends next to yours (skipping the position where your pawn could have captured their pawn),
                 then on your immediately following turn your pawn may capture their pawn as if their pawn had only moved 1 square.
             This is as if your pawn is capturing their pawn mid motion, or In Passing.
-            */
+       */
+
+
+        //System.out.println(board.toString());
+        return moves;
+
+
 
     }
 
@@ -98,15 +185,25 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if (move == null ) return;
+        if (move.getStartPosition() == null || move.getEndPosition() == null) return;
         Collection <ChessMove> moves = validMoves(move.getStartPosition());
         //System.out.println(moves.toString());
         ChessPiece x = board.getPiece(move.getStartPosition());
+        ChessPiece y = board.getPiece(move.getEndPosition());
         if (x != null && x.getTeamColor() != getTeamTurn()) {
             //System.out.println("TeamTurn = " + getTeamTurn().toString() + "\nPieceTeam = " + x.getTeamColor());
             throw new InvalidMoveException("Invalid Move: Not your piece");
         } else if (moves.contains(move)){
             ChessBoard updateBoard = board;
-            updateBoard.moveAction(move);
+            if (move.getIsSwap()){
+                updateBoard.swapAction(move);
+                x.setPieceStatus(true);
+                y.setPieceStatus(true);
+            } else {
+                updateBoard.moveAction(move);
+                x.setPieceStatus(true);
+            }
             setBoard(updateBoard);
         } else {
            throw new InvalidMoveException("Invalid Move: Piece not able to move to chosen position");

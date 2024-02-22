@@ -13,10 +13,12 @@ import java.util.Objects;
 public class ChessPiece {
     private ChessGame.TeamColor pieceColor;
     private ChessPiece.PieceType type;
+    private boolean pieceStatus;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
+        this.pieceStatus = false;
     }
 
     /**
@@ -29,6 +31,14 @@ public class ChessPiece {
         KNIGHT,
         ROOK,
         PAWN
+    }
+
+    boolean getPieceStatus () {
+        return this.pieceStatus;
+    }
+
+    void setPieceStatus (boolean x) {
+        this.pieceStatus = x;
     }
 
     /**
