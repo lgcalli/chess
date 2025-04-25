@@ -6,7 +6,8 @@ package chess;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessBoard {
+public class ChessBoard {    
+    private ChessPiece[][] squares = new ChessPiece[9][9];
 
     public ChessBoard() {
         
@@ -19,6 +20,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
+        
         throw new RuntimeException("Not implemented");
     }
 
