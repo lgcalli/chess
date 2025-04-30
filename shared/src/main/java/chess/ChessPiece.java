@@ -70,6 +70,7 @@ public class ChessPiece {
         Collection <ChessMove> moves = new ArrayList<>();
         switch (type) {
             case KING:
+
                 break;
             case QUEEN:
                 moves = diagonals(board, myPosition, moves);
@@ -79,15 +80,42 @@ public class ChessPiece {
                 moves = diagonals(board, myPosition, moves);
                 break;
             case KNIGHT:
+                int row = myPosition.getRow();
+                int column = myPosition.getColumn();
+                moves = jumps(board, myPosition, moves, row + 2, column + 1);
+                moves = jumps(board, myPosition, moves, row - 2, column - 1);
+                moves = jumps(board, myPosition, moves, row + 2, column - 1);
+                moves = jumps(board, myPosition, moves, row - 2, column + 1);
+                moves = jumps(board, myPosition, moves, row + 1, column + 2);
+                moves = jumps(board, myPosition, moves, row - 1, column - 2);
+                moves = jumps(board, myPosition, moves, row + 1, column - 2);
+                moves = jumps(board, myPosition, moves, row - 1, column + 2);
                 break;
             case ROOK:
                 moves = straights(board, myPosition, moves);
                 break;
             case PAWN:
+
                 break;
         }
         return moves;
     }
+    private Collection<ChessMove> jumps (ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, int row, int column) {
+       //if the jump is within bounds, check if there is nothing in the spot or if it is a capturable piece
+        if (row >= 1 && column >= 1 && row <= 8 && column <= 8){
+            ChessPosition position = new ChessPosition (row, column);
+            ChessPiece piece = board.getPiece(position);
+            if (piece == null){
+                //if there is nothing in the spot
+                moves.add(new ChessMove(myPosition, position, null));
+            } else if (piece.getTeamColor() != pieceColor) {
+                //if the spot has an enemy piece that can be captured
+                moves.add(new ChessMove(myPosition, position, null));
+            }
+        }
+        return moves;
+    }
+
 
     private Collection<ChessMove> diagonals (ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
         //define reference variables
