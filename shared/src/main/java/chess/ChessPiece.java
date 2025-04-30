@@ -1,5 +1,6 @@
 package chess;
 
+import java.security.cert.CollectionCertStoreParameters;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -70,7 +71,7 @@ public class ChessPiece {
         Collection <ChessMove> moves = new ArrayList<>();
         switch (type) {
             case KING:
-
+                moves = surrounding(board, myPosition, moves);
                 break;
             case QUEEN:
                 moves = diagonals(board, myPosition, moves);
@@ -95,11 +96,35 @@ public class ChessPiece {
                 moves = straights(board, myPosition, moves);
                 break;
             case PAWN:
-
+                moves = pawn(board, myPosition, moves);
                 break;
         }
         return moves;
     }
+
+    private Collection<ChessMove> surrounding (ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves ) {
+        int row = myPosition.getRow();
+        int column = myPosition.getColumn();
+        //check surrounding spaces above, below, and next to the current position
+        for (int i = row - 1; i <= row + 1; i++){
+            for (int j = column - 1; j <= column + 1; j++){
+                if (i == row && j == column) continue;
+                if (i < 1 || j < 1) continue;
+                if (i > 8 || j > 8) continue;
+                ChessPosition newPosition = new ChessPosition(i, j);
+                if (board.getPiece(newPosition) == null){
+                    ChessMove newMove = new ChessMove(myPosition, newPosition, null);
+                    moves.add(newMove);
+                } else if (board.getPiece(newPosition).getTeamColor() != pieceColor) {
+                    ChessMove newMove = new ChessMove(myPosition, newPosition, null);
+                    moves.add(newMove);
+                }
+            }
+        }
+        return moves;
+    }
+
+
     private Collection<ChessMove> jumps (ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, int row, int column) {
        //if the jump is within bounds, check if there is nothing in the spot or if it is a capturable piece
         if (row >= 1 && column >= 1 && row <= 8 && column <= 8){
@@ -261,5 +286,25 @@ public class ChessPiece {
         return moves;
     }
 
+    private Collection<ChessMove> pawn (ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
+        int row = myPosition.getRow();
+        int column = myPosition.getColumn();
+
+        if (pieceColor == ChessGame.TeamColor.WHITE){
+            if (row == 2){
+
+            } else {
+
+            }
+        } else if (pieceColor == ChessGame.TeamColor.BLACK){
+            if (row == 7){
+
+            } else {
+
+            }
+        }
+
+        return moves;
+    }
 }
 
