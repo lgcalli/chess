@@ -10,11 +10,9 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    private ChessPiece[][] squares = new ChessPiece[8][8];
+    private final ChessPiece[][] squares = new ChessPiece[8][8];
 
-    public ChessBoard() {
-
-    }
+    public ChessBoard() {}
 
     /**
      * Adds a chess piece to the chessboard
@@ -76,40 +74,40 @@ public class ChessBoard {
     }
 
     public String printChessBoard () {
-        String s = "\nCHESSBOARD\n";
+        StringBuilder s = new StringBuilder("\nCHESSBOARD\n");
         for (int i = 7; i >= 0; i--){
             for (int j = 0; j < 7; j++){
                 if (squares[i][j] == null){
-                    s = s + "[ | ]";
+                    s.append("[ | ]");
                 } else {
                     if (squares[i][j].getTeamColor() == ChessGame.TeamColor.WHITE) {
-                        s = s + "[w|";
+                        s.append("[w|");
                     } else if (squares[i][j].getTeamColor() == ChessGame.TeamColor.BLACK){
-                        s = s + "[b|";
+                        s.append("[b|");
                     }
                     if (squares[i][j].getPieceType() == ChessPiece.PieceType.KING){
-                        s = s + "K]";
+                        s.append("K]");
                     }
                     else if (squares[i][j].getPieceType() == ChessPiece.PieceType.QUEEN){
-                        s = s + "Q]";
+                        s.append("Q]");
                     }
                     else if (squares[i][j].getPieceType() == ChessPiece.PieceType.KNIGHT){
-                        s = s + "k]";
+                        s.append("k]");
                     }
                     else if (squares[i][j].getPieceType() == ChessPiece.PieceType.ROOK){
-                        s = s + "r]";
+                        s.append("r]");
                     }
                     else if (squares[i][j].getPieceType() == ChessPiece.PieceType.BISHOP){
-                        s = s + "B]";
+                        s.append("B]");
                     }
                     else if (squares[i][j].getPieceType() == ChessPiece.PieceType.PAWN){
-                        s = s + "P]";
+                        s.append("P]");
                     }
                 }
             }
-            s = s + '\n';
+            s.append('\n');
         }
-        return s;
+        return s.toString();
     }
 
     @Override
