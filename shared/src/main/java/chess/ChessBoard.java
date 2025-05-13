@@ -11,14 +11,13 @@ import java.util.*;
  */
 public class ChessBoard {
     private final ChessPiece[][] squares = new ChessPiece[8][8];
-    private HashMap <ChessPiece.PieceType, HashSet <ChessPosition>> allPieceBlack;
-    private HashMap <ChessPiece.PieceType, HashSet <ChessPosition>> allPieceWhite;
+    private final HashMap <ChessPiece.PieceType, HashSet <ChessPosition>> allPieceBlack;
+    private final HashMap <ChessPiece.PieceType, HashSet <ChessPosition>> allPieceWhite;
 
 
     public ChessBoard() {
         allPieceBlack = new HashMap<>();
         allPieceWhite = new HashMap<>();
-
         updateColorMaps();
     }
 
@@ -47,19 +46,8 @@ public class ChessBoard {
     public void deletePiece(ChessPosition position) {
         ChessPiece piece = getPiece(position);
         if (piece == null) return;
+        deleteAllPieceColorListByType(piece, position, piece.getTeamColor());
         addPiece(position, null);
-    }
-
-    void swapAction (ChessMove move) {
-        ChessPiece x = getPiece(move.getStartPosition());
-        ChessPiece y = this.getPiece(move.getEndPosition());
-        deletePiece(move.getStartPosition());
-        if (y != null){
-            deletePiece(move.getEndPosition());
-            deletePiece(move.getStartPosition());
-            addPiece(move.getEndPosition(), x);
-            addPiece(move.getStartPosition(), y);
-        } else return;
     }
 
     boolean movePutsBoardInCheck (ChessMove move, ChessGame.TeamColor teamColor) {
@@ -67,15 +55,10 @@ public class ChessBoard {
         ChessPiece x = getPiece(move.getStartPosition());
         ChessPiece y = this.getPiece(move.getEndPosition());
         moveAction(move);
-        if (boardInCheck(teamColor)) {
-            returnValue = true;
-        } else {
-            returnValue = false;
-        }
+        returnValue = boardInCheck(teamColor);
         undoMoveAction(x, y, move);
         return returnValue;
     }
-
 
     boolean boardInCheck (ChessGame.TeamColor teamColor) {
         ChessGame.TeamColor opposingColor = null;
@@ -86,28 +69,20 @@ public class ChessBoard {
             opposingColor = ChessGame.TeamColor.WHITE;
         }
         Collection<ChessPosition> opposingEndPositions = this.calculateTeamEndPositions(opposingColor);
-        if (opposingEndPositions.contains(getAllPieceColorIndividualByType(ChessPiece.PieceType.KING, teamColor))){
-            return true;
-        } else {
-            return false;
-        }
+        return opposingEndPositions.contains(getAllPieceColorIndividualByType(ChessPiece.PieceType.KING, teamColor));
     }
 
     public Collection <ChessPosition> calculateTeamStartPositions (ChessGame.TeamColor x){
         Collection<ChessPosition> positions = new HashSet<>();
         HashSet <ChessMove> teamMovesSet = calculateTeamMovesSet (x);
-        teamMovesSet.forEach(chessMove -> {
-            positions.add(chessMove.getStartPosition());
-        });
+        teamMovesSet.forEach(chessMove -> positions.add(chessMove.getStartPosition()));
         return positions;
     }
 
     public Collection<ChessPosition> calculateTeamEndPositions (ChessGame.TeamColor x) {
         Collection<ChessPosition> positions = new HashSet<>();
         HashSet <ChessMove> teamMovesSet = calculateTeamMovesSet (x);
-        teamMovesSet.forEach(chessMove -> {
-            positions.add(chessMove.getEndPosition());
-        });
+        teamMovesSet.forEach(chessMove -> positions.add(chessMove.getEndPosition()));
         return positions;
     }
 
@@ -118,9 +93,7 @@ public class ChessBoard {
                 ChessPosition position = new ChessPosition (i, j);
                 if (this.getPiece(position) != null && this.getPiece(position).getTeamColor() == x){
                     Collection <ChessMove> validChessMoves = this.getPiece(position).pieceMoves(this, position);
-                    validChessMoves.forEach(chessMove -> {
-                        moves.add(chessMove);
-                    });
+                    moves.addAll(validChessMoves);
                 }
             }
         }
@@ -137,7 +110,6 @@ public class ChessBoard {
 
     public ChessPosition getAllPieceColorIndividualByType (ChessPiece.PieceType pieceType, ChessGame.TeamColor color) {
         HashSet<ChessPosition> newSet = getAllPieceColorListByType(pieceType, color);
-        if (newSet == null) return null;
         if (newSet.isEmpty()) return null;
         return newSet.stream().toList().getFirst();
     }
@@ -189,6 +161,7 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         squares [position.getRow() - 1][position.getColumn() - 1] = piece;
+        updateColorMaps();
     }
 
     /**

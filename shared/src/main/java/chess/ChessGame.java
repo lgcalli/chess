@@ -1,6 +1,5 @@
 package chess;
 
-import javax.xml.transform.stax.StAXResult;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -69,9 +68,7 @@ public class ChessGame {
         if (board.getPiece(startPosition) == null) return null;
         TeamColor teamColor = board.getPiece(startPosition).getTeamColor();
         Collection <ChessMove> moves = board.getPiece(startPosition).pieceMoves(board, startPosition);
-        moves.removeIf(chessMove -> {
-            return board.movePutsBoardInCheck(chessMove, teamColor);
-        });
+        moves.removeIf(chessMove -> board.movePutsBoardInCheck(chessMove, teamColor));
         return moves;
     }
 
@@ -82,13 +79,12 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        move.getStartPosition();
-        move.getEndPosition();
-
         Collection <ChessMove> moves = validMoves(move.getStartPosition());
         ChessPiece x = board.getPiece(move.getStartPosition());
         if (x != null && x.getTeamColor() != getTeamTurn()) {
             throw new InvalidMoveException("Invalid Move: Not your piece");
+        } else if (x == null){
+            throw new InvalidMoveException("Invalid Move: No Piece");
         } else if (moves.contains(move)){
             ChessBoard updateBoard = board;
             updateBoard.moveAction(move);
@@ -131,23 +127,17 @@ public class ChessGame {
         if (!isInCheck(teamColor)) return false;
         AtomicBoolean inCheckMate = new AtomicBoolean(true);
 
-
         ChessPosition kingPos = getBoard().getAllPieceColorIndividualByType(ChessPiece.PieceType.KING, teamColor);
         Collection<ChessMove> kingMoves = validMoves(kingPos);
         Collection<ChessPosition> kingEndPositions = new HashSet<>();
         if (!kingMoves.isEmpty()) {
-            kingMoves.forEach(chessMove -> {
-                kingEndPositions.add(chessMove.getEndPosition());
-            });
+            kingMoves.forEach(chessMove -> kingEndPositions.add(chessMove.getEndPosition()));
         }
         Collection <ChessPosition> opposingEndPositions = board.calculateTeamEndPositions(opposingColor);
-        if (kingEndPositions == null || kingEndPositions.isEmpty()) {
-            if (isInCheck(teamColor)) inCheckMate.set(true);
-            else inCheckMate.set(false);
-        }  else if (kingEndPositions.containsAll(opposingEndPositions)) {
+        Collection <ChessPosition> opposingStartPositions = board.calculateTeamStartPositions(opposingColor);
+        if (kingEndPositions.containsAll(opposingEndPositions)) {
             inCheckMate.set(true);
         }
-        if (inCheckMate.get()) return inCheckMate.get();
         return inCheckMate.get();
     }
 
@@ -159,6 +149,7 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
+        if (isInCheck(teamColor)) return false;
         AtomicBoolean x = new AtomicBoolean(true);
         if (teamColor == TeamColor.WHITE){
             Collection <ChessPosition> whiteStartPositions = board.calculateTeamStartPositions(TeamColor.WHITE);
@@ -194,6 +185,6 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        return board;
+        return this.board;
     }
 }
