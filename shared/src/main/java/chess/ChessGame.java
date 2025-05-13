@@ -27,8 +27,6 @@ public class ChessGame {
         return teamTurn;
     }
 
-
-
     /**
      * Set's which teams turn it is
      *
@@ -70,7 +68,9 @@ public class ChessGame {
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = getBoard().getPiece(startPosition);
         Collection<ChessMove> moves = piece.pieceMoves(getBoard(), startPosition);
+        for (ChessMove move : moves) {
 
+        }
         return moves;
     }
 
@@ -81,6 +81,33 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        move.getStartPosition();
+        move.getEndPosition();
+        ChessPiece piece = getBoard().getPiece(move.getStartPosition());
+
+        Collection <ChessMove> moves = validMoves(move.getStartPosition());
+        //System.out.println(moves.toString());
+        ChessPiece x = board.getPiece(move.getStartPosition());
+        ChessPiece y = board.getPiece(move.getEndPosition());
+        if (x != null && x.getTeamColor() != getTeamTurn()) {
+            //System.out.println("TeamTurn = " + getTeamTurn().toString() + "\nPieceTeam = " + x.getTeamColor());
+            throw new InvalidMoveException("Invalid Move: Not your piece");
+        } else if (moves.contains(move)){
+            ChessBoard updateBoard = board;
+            updateBoard.moveAction(move);
+            setBoard(updateBoard);
+        } else {
+            throw new InvalidMoveException("Invalid Move: Piece not able to move to chosen position");
+        }
+        if (getTeamTurn() == TeamColor.WHITE){
+            setTeamTurn(TeamColor.BLACK);
+        } else if (getTeamTurn() == TeamColor.BLACK) {
+            setTeamTurn(TeamColor.WHITE);
+        }
+
+    }
+
+    public void undoMove (ChessMove move)  {
         move.getStartPosition();
         move.getEndPosition();
         ChessPiece piece = getBoard().getPiece(move.getStartPosition());

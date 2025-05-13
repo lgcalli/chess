@@ -18,9 +18,35 @@ public class ChessBoard {
     private final ChessPiece[][] squares = new ChessPiece[8][8];
 
     public ChessBoard() {
-        allPieceBlack = new HashMap<>();
-        allPieceWhite = new HashMap<>();
 
+    }
+
+    void moveAction (ChessMove move)  {
+        ChessPiece x = getPiece(move.getStartPosition());
+        ChessPiece y = this.getPiece(move.getEndPosition());
+        deletePiece(move.getStartPosition());
+        if (y != null){
+            deletePiece(move.getEndPosition());
+        }
+        if (move.getPromotionPiece() != null){
+            addPiece(move.getEndPosition(), new ChessPiece(x.getTeamColor(), move.getPromotionPiece()));
+        } else {
+            addPiece(move.getEndPosition(), x);
+        }
+    }
+
+    void undoMoveAction (ChessPiece x, ChessPiece y, ChessMove move) {
+        deletePiece(move.getEndPosition());
+        if (y != null){
+            addPiece(move.getEndPosition(), y);
+        }
+        addPiece(move.getStartPosition(), x);
+    }
+
+    public void deletePiece(ChessPosition position) {
+        ChessPiece piece = getPiece(position);
+        if (piece == null) return;
+        addPiece(position, null);
     }
 
     /**
