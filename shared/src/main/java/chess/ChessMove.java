@@ -12,12 +12,14 @@ public class ChessMove {
     private final ChessPosition startPosition;
     private final ChessPosition endPosition;
     private final ChessPiece.PieceType promotionPiece;
+    private boolean isSwap;
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
         this.startPosition = startPosition;
         this.endPosition = endPosition;
         this.promotionPiece = promotionPiece;
+        this.isSwap = false;
     }
 
     /**
@@ -43,6 +45,15 @@ public class ChessMove {
     public ChessPiece.PieceType getPromotionPiece() {
         return promotionPiece;
     }
+
+    public void setIsSwap (boolean x){
+        this.isSwap = x;
+    }
+
+    public boolean getIsSwap () {
+        return this.isSwap;
+    }
+
 
     @Override
     public boolean equals(Object o) {
