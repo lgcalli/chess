@@ -2,6 +2,11 @@ package chess;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Collection;
+
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -11,8 +16,15 @@ import java.util.Objects;
  */
 public class ChessBoard {
     private final ChessPiece[][] squares = new ChessPiece[8][8];
+    private HashMap <ChessPiece.PieceType, HashSet <ChessPosition>> allPieceBlack;
+    private HashMap <ChessPiece.PieceType, HashSet <ChessPosition>> allPieceWhite;
 
-    public ChessBoard() {}
+    public ChessBoard() {
+        allPieceBlack = new HashMap<>();
+        allPieceWhite = new HashMap<>();
+
+        updateColorMaps();
+    }
 
     /**
      * Adds a chess piece to the chessboard
@@ -67,6 +79,196 @@ public class ChessBoard {
         squares[7][6] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
         squares[7][7] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
     }
+
+    public void deletePiece(ChessPosition position) {
+        ChessPiece piece = squares[position.getRow()][position.getColumn()];
+        if (piece == null) return;
+        deleteAllPieceColorListByType(piece, position, piece.getTeamColor());
+        squares[position.getRow()][position.getColumn()] = null;
+    }
+
+    void moveAction (ChessMove move)  {
+        ChessPiece x = getPiece(move.getStartPosition());
+        ChessPiece y = this.getPiece(move.getEndPosition());
+        deletePiece(move.getStartPosition());
+        if (y != null){
+            deletePiece(move.getEndPosition());
+        }
+        if (move.getPromotionPiece() != null){
+            addPiece(move.getEndPosition(), new ChessPiece(x.getTeamColor(), move.getPromotionPiece()));
+        } else {
+            addPiece(move.getEndPosition(), x);
+        }
+    }
+
+    void undoMoveAction (ChessPiece x, ChessPiece y, ChessMove move) {
+        deletePiece(move.getEndPosition());
+        if (y != null){
+            addPiece(move.getEndPosition(), y);
+        }
+        addPiece(move.getStartPosition(), x);
+    }
+
+    boolean movePutsPieceInDanger (ChessMove move, ChessGame.TeamColor teamColor){
+        boolean returnValue = false;
+        ChessPiece x = getPiece(move.getStartPosition());
+        ChessPiece y = this.getPiece(move.getEndPosition());
+        ChessGame.TeamColor enemyColor = null ;
+        if (teamColor == ChessGame.TeamColor.WHITE) enemyColor = ChessGame.TeamColor.BLACK;
+        if (teamColor == ChessGame.TeamColor.BLACK) enemyColor = ChessGame.TeamColor.WHITE;
+
+        moveAction(move);
+        Collection <ChessPosition> endPositions = this.calculateTeamEndPositions(enemyColor);
+        if (endPositions.contains(move.getStartPosition())) returnValue = true;
+        undoMoveAction(x, y, move);
+
+        return returnValue;
+    }
+
+
+    boolean movePutsBoardInCheck (ChessMove move, ChessGame.TeamColor teamColor) {
+        //System.out.println("Before Move");
+        //System.out.println(this.toString());
+
+        boolean returnValue;
+        ChessPiece x = getPiece(move.getStartPosition());
+        ChessPiece y = this.getPiece(move.getEndPosition());
+        moveAction(move);
+        if (boardInCheck(teamColor)) {
+            //System.out.println("No, in check...removing move: " + move.toString());
+            //moves.remove(chessMove);
+            //System.out.println(this.toString());
+            returnValue = true;
+        } else {
+            //System.out.println("Yes");
+            //System.out.println(this.toString());
+            returnValue = false;
+        }
+
+        //System.out.println("After Move");
+        //System.out.println(this.toString());
+
+
+        undoMoveAction(x, y, move);
+
+        //System.out.println("After Reset");
+        //System.out.println(this.toString());
+
+        return returnValue;
+    }
+
+    boolean boardInCheck (ChessGame.TeamColor teamColor) {
+        //System.out.println("\n----- In Check?");
+        ChessGame.TeamColor opposingColor = null;
+        if (teamColor == ChessGame.TeamColor.WHITE) {
+            opposingColor = ChessGame.TeamColor.BLACK;
+        }
+        if (teamColor == ChessGame.TeamColor.BLACK) {
+            opposingColor = ChessGame.TeamColor.WHITE;
+        }
+        //System.out.println(this.toString());
+        Collection<ChessPosition> opposingEndPositions = this.calculateTeamEndPositions(opposingColor);
+        if (opposingEndPositions.contains(getAllPieceColorIndividualByType(ChessPiece.PieceType.KING, teamColor))){
+            //System.out.println("yes");
+            //System.out.println(opposingEndPositions.toString());
+            //System.out.println("King position = " + this.getAllPieceColor(teamColor).get(ChessPiece.PieceType.KING).toString());
+            //System.out.println("\n-----");
+            return true;
+        } else {
+            //System.out.println("nope");
+            //System.out.println("\n-----");
+            return false;
+        }
+    }
+
+    public Collection <ChessPosition> calculateTeamStartPositions (ChessGame.TeamColor x){
+        Collection<ChessPosition> positions = new HashSet<>();
+        HashSet <ChessMove> teamMovesSet = calculateTeamMovesSet (x);
+        teamMovesSet.forEach(chessMove -> {
+            positions.add(chessMove.getStartPosition());
+        });
+        return positions;
+    }
+
+    public Collection<ChessPosition> calculateTeamEndPositions (ChessGame.TeamColor x) {
+        Collection<ChessPosition> positions = new HashSet<>();
+        HashSet <ChessMove> teamMovesSet = calculateTeamMovesSet (x);
+        teamMovesSet.forEach(chessMove -> {
+            positions.add(chessMove.getEndPosition());
+        });
+        return positions;
+    }
+
+    public HashSet <ChessMove> calculateTeamMovesSet (ChessGame.TeamColor x) {
+        HashSet <ChessMove> moves = new HashSet<>();
+        for (int i = 0; i < 9; i++){
+            for (int j = 0; j < 9; j++){
+                ChessPosition position = new ChessPosition (i, j);
+                if (this.getPiece(position) != null && this.getPiece(position).getTeamColor() == x){
+                    Collection <ChessMove> validChessMoves = this.getPiece(position).pieceMoves(this, position);
+                    validChessMoves.forEach(chessMove -> {
+                        moves.add (chessMove);
+                    });
+                }
+            }
+        }
+        return moves;
+    }
+
+    public HashSet<ChessPosition> getAllPieceColorListByType (ChessPiece.PieceType pieceType, ChessGame.TeamColor color) {
+        if (color == ChessGame.TeamColor.WHITE){
+            return allPieceWhite.get(pieceType);
+        } else {
+            return allPieceBlack.get(pieceType);
+        }
+    }
+
+    public ChessPosition getAllPieceColorIndividualByType (ChessPiece.PieceType pieceType, ChessGame.TeamColor color) {
+        HashSet<ChessPosition> newSet = getAllPieceColorListByType(pieceType, color);
+        if (newSet == null) return null;
+        return newSet.stream().toList().getFirst();
+    }
+
+    public void addAllPieceColorListByType (ChessPiece piece, ChessPosition position, ChessGame.TeamColor color) {
+        HashSet <ChessPosition> newSet = this.getAllPieceColorListByType(piece.getPieceType(),color);
+        if (newSet == null) newSet = new HashSet<>();
+        else newSet.add(position);
+        if (color == ChessGame.TeamColor.WHITE){
+            allPieceWhite.put(piece.getPieceType(), newSet);
+        } else {
+            allPieceBlack.put(piece.getPieceType(), newSet);
+        }
+    }
+
+    public void deleteAllPieceColorListByType (ChessPiece piece, ChessPosition position, ChessGame.TeamColor color) {
+        HashSet <ChessPosition> newSet = this.getAllPieceColorListByType(piece.getPieceType(),color);
+        if (newSet == null) return;
+        else newSet.remove(position);
+        if (color == ChessGame.TeamColor.WHITE){
+            allPieceWhite.put(piece.getPieceType(), newSet);
+        } else {
+            allPieceBlack.put(piece.getPieceType(), newSet);
+        }
+    }
+
+    public void updateColorMaps () {
+        for (int i = 0; i < 9; i++){
+            for (int j = 0; j < 9; j++){
+                if (squares[i][j] != null){
+                    if (squares[i][j].getTeamColor() == ChessGame.TeamColor.WHITE){
+                        addAllPieceColorListByType(squares[i][j], new ChessPosition(i, j), ChessGame.TeamColor.WHITE);
+                    }
+                    if (squares[i][j].getTeamColor() == ChessGame.TeamColor.BLACK){
+                        addAllPieceColorListByType(squares[i][j], new ChessPosition(i, j), ChessGame.TeamColor.BLACK);
+
+                    }
+                }
+            }
+        }
+    }
+
+
+
 
     @Override
     public String toString() {

@@ -27,6 +27,8 @@ public class ChessGame {
         return teamTurn;
     }
 
+
+
     /**
      * Set's which teams turn it is
      *
