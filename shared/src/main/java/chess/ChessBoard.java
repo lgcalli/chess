@@ -62,30 +62,6 @@ public class ChessBoard {
         } else return;
     }
 
-    boolean movePutsPieceInDanger (ChessMove move, ChessGame.TeamColor teamColor){
-        boolean returnValue = false;
-        ChessPiece x = getPiece(move.getStartPosition());
-        ChessPiece y = this.getPiece(move.getEndPosition());
-        ChessGame.TeamColor enemyColor = null ;
-        if (teamColor == ChessGame.TeamColor.WHITE) enemyColor = ChessGame.TeamColor.BLACK;
-        if (teamColor == ChessGame.TeamColor.BLACK) enemyColor = ChessGame.TeamColor.WHITE;
-
-        if (!move.getIsSwap()) {
-            moveAction(move);
-            Collection <ChessPosition> endPositions = this.calculateTeamEndPositions(enemyColor);
-            if (endPositions.contains(move.getStartPosition())) returnValue = true;
-            undoMoveAction(x, y, move);
-        } else {
-            swapAction(move);
-            Collection <ChessPosition> endPositions = this.calculateTeamEndPositions(enemyColor);
-            if (endPositions.contains(move.getStartPosition())) returnValue = true;
-            swapAction (new ChessMove(move.getEndPosition(), move.getStartPosition(), move.getPromotionPiece()));
-        }
-
-        return returnValue;
-    }
-
-
     boolean movePutsBoardInCheck (ChessMove move, ChessGame.TeamColor teamColor) {
         boolean returnValue;
         ChessPiece x = getPiece(move.getStartPosition());
@@ -96,9 +72,7 @@ public class ChessBoard {
         } else {
             returnValue = false;
         }
-
         undoMoveAction(x, y, move);
-
         return returnValue;
     }
 

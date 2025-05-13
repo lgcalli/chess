@@ -1,8 +1,8 @@
 package chess;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
+import javax.xml.transform.stax.StAXResult;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -111,7 +111,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return board.boardInCheck(teamColor);
     }
 
     /**
@@ -121,7 +121,34 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        TeamColor opposingColor = null;
+        if (teamColor == TeamColor.WHITE) {
+            opposingColor = TeamColor.BLACK;
+        }
+        if (teamColor == TeamColor.BLACK) {
+            opposingColor = TeamColor.WHITE;
+        }
+        if (!isInCheck(teamColor)) return false;
+        AtomicBoolean inCheckMate = new AtomicBoolean(true);
+
+
+        ChessPosition kingPos = getBoard().getAllPieceColorIndividualByType(ChessPiece.PieceType.KING, teamColor);
+        Collection<ChessMove> kingMoves = validMoves(kingPos);
+        Collection<ChessPosition> kingEndPositions = new HashSet<>();
+        if (!kingMoves.isEmpty()) {
+            kingMoves.forEach(chessMove -> {
+                kingEndPositions.add(chessMove.getEndPosition());
+            });
+        }
+        Collection <ChessPosition> opposingEndPositions = board.calculateTeamEndPositions(opposingColor);
+        if (kingEndPositions == null || kingEndPositions.isEmpty()) {
+            if (isInCheck(teamColor)) inCheckMate.set(true);
+            else inCheckMate.set(false);
+        }  else if (kingEndPositions.containsAll(opposingEndPositions)) {
+            inCheckMate.set(true);
+        }
+        if (inCheckMate.get()) return inCheckMate.get();
+        return inCheckMate.get();
     }
 
     /**
@@ -132,7 +159,23 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        AtomicBoolean x = new AtomicBoolean(true);
+        if (teamColor == TeamColor.WHITE){
+            Collection <ChessPosition> whiteStartPositions = board.calculateTeamStartPositions(TeamColor.WHITE);
+            whiteStartPositions.forEach(position -> {
+                if (!validMoves(position).isEmpty()){
+                    x.set(false);
+                }
+            });
+        } else if (teamColor == TeamColor.BLACK){
+            Collection <ChessPosition> blackStartPositions = board.calculateTeamStartPositions(TeamColor.BLACK);
+            blackStartPositions.forEach(position -> {
+                if (!validMoves(position).isEmpty()){
+                    x.set(false);
+                }
+            });
+        }
+        return x.get();
     }
 
     /**
@@ -142,6 +185,7 @@ public class ChessGame {
      */
     public void setBoard(ChessBoard board) {
         this.board = board;
+        this.board.updateColorMaps();
     }
 
     /**
