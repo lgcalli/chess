@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.Iterator;
 import java.util.Objects;
 
 /**
@@ -47,3 +48,4 @@ public class ChessPosition {
         return Objects.hash(row, col);
     }
 }
+

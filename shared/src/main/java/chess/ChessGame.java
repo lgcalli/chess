@@ -134,7 +134,10 @@ public class ChessGame {
             kingMoves.forEach(chessMove -> kingEndPositions.add(chessMove.getEndPosition()));
         }
         Collection <ChessPosition> opposingEndPositions = board.calculateTeamEndPositions(opposingColor);
-        Collection <ChessPosition> opposingStartPositions = board.calculateTeamStartPositions(opposingColor);
+        HashSet <ChessMove> teamMoves = board.calculateTeamMovesSet(teamColor);
+        for (ChessMove move:teamMoves){
+            if (board.moveGetsBoardOutOfCheck(move, teamColor)) return false;
+        }
         if (kingEndPositions.containsAll(opposingEndPositions)) {
             inCheckMate.set(true);
         }

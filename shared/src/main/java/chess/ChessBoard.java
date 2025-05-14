@@ -60,6 +60,17 @@ public class ChessBoard {
         return returnValue;
     }
 
+    boolean moveGetsBoardOutOfCheck (ChessMove move, ChessGame.TeamColor teamColor) {
+        boolean returnValue;
+        ChessPiece x = getPiece(move.getStartPosition());
+        ChessPiece y = this.getPiece(move.getEndPosition());
+        moveAction(move);
+        returnValue = !boardInCheck(teamColor); // Changed: Now returns true if the move gets out of check
+        undoMoveAction(x, y, move);
+        return returnValue;
+    }
+
+
     boolean boardInCheck (ChessGame.TeamColor teamColor) {
         ChessGame.TeamColor opposingColor = null;
         if (teamColor == ChessGame.TeamColor.WHITE) {
