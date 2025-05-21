@@ -1,18 +1,17 @@
 package dataAccess;
 
-import exception.ResponseException;
 import model.UserData;
 
 
 public interface UserDAO {
-    void createUser (UserData user) throws ResponseException;
+    void createUser (UserData user) throws DataAccessException;
 
-    UserData getUser (String username) throws ResponseException;
+    UserData getUser (String username) throws DataAccessException;
 
-    void updateUser (String username, String password, String newUsername, String newPassword) throws ResponseException;
+    void updateUser (String username, String password, String newUsername, String newPassword) throws DataAccessException;
 
-    void deleteUser (String username, String password) throws ResponseException;
+    void deleteUser (String username, String password) throws DataAccessException;
 
-    void clearUser () throws ResponseException;
+    void clearUser () throws DataAccessException;
 
 }

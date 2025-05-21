@@ -1,7 +1,6 @@
 package dataAccess;
 
 import chess.ChessGame;
-import exception.ResponseException;
 import model.GameData;
 
 import java.util.Collection;
@@ -9,22 +8,22 @@ import java.util.List;
 
 public class MemoryGameDAO implements GameDAO{
 
-    public void createGame(String gameName, String username) throws ResponseException {
+    public void createGame(String gameName, String username) {
 
     }
-    public GameData getGame(String gameName) throws ResponseException {
+    public GameData getGame(String gameName) {
         return null;
     }
-    public void updateGame(int gameID, String username, ChessGame.TeamColor color) throws ResponseException {
+    public void updateGame(int gameID, String username, ChessGame.TeamColor color) {
 
     }
-    public void deleteGame(int gameID) throws ResponseException {
+    public void deleteGame(int gameID) {
 
     }
-    public Collection<GameData> listGames() throws ResponseException {
+    public Collection<GameData> listGames() {
         return List.of();
     }
-    public void clearGames() throws ResponseException {
+    public void clearGames() {
 
     }
 }

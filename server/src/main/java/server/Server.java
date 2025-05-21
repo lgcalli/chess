@@ -1,7 +1,6 @@
 package server;
 
 import com.google.gson.Gson;
-import exception.ResponseException;
 import model.UserData;
 import spark.*;
 import service.*;
@@ -10,9 +9,21 @@ import dataAccess.DataAccessException;
 import javax.xml.crypto.Data;
 
 public class Server {
-    private final UserService userService;
-    private final AuthService authService;
-    private final GameService gameService;
+    private UserService userService;
+    private AuthService authService;
+    private GameService gameService;
+
+    record LoginRequest(
+            String username,
+            String password){
+    }
+    record LoginResponse(
+            String authToken,
+            String username){
+    }
+
+    public Server() {
+    }
 
     public Server(UserService userService, AuthService authService, GameService gameService) {
         this.userService = userService;
@@ -30,7 +41,7 @@ public class Server {
         //REGISTRATION
         Spark.post("/user", this::register);
         //LOGIN
-        //Spark.post("/session", this::login);
+        Spark.post("/session", this::login);
         //LOGOUT
         //Spark.delete("/session", this::logout);
         //LIST GAMES
@@ -54,11 +65,23 @@ public class Server {
         Spark.awaitStop();
     }
 
-    private Object register(Request req, Response res) throws ResponseException {
+    private Object register(Request req, Response res) throws DataAccessException {
         var user = new Gson().fromJson(req.body(), UserData.class);
         String authToken = userService.register(user);
         return new Gson().toJson(authToken);
     }
+
+    private Object login(Request req, Response res) throws DataAccessException {
+        var loginRequest = new Gson().fromJson(req.body(), LoginRequest.class);
+        String authToken = userService.login(loginRequest.username, loginRequest.password);
+        LoginResponse loginResponse = new LoginResponse(authToken, loginRequest.username);
+        return new Gson().toJson(loginResponse);
+    }
+
+    private void logout (Request req, Response res) throws DataAccessException {
+
+    }
+
 
 
 }
