@@ -1,17 +1,14 @@
 package server;
 
 import com.google.gson.Gson;
+import dataAccess.*;
 import model.UserData;
+import service.Service;
 import spark.*;
 import service.*;
-import dataAccess.DataAccessException;
-
-import javax.xml.crypto.Data;
 
 public class Server {
-    private UserService userService;
-    private AuthService authService;
-    private GameService gameService;
+    private final Service service;
 
     record LoginRequest(
             String username,
@@ -28,13 +25,13 @@ public class Server {
 
 
     public Server() {
+        UserDAO userDAO = new MemoryUserDAO();
+        AuthDAO authDAO = new MemoryAuthDAO();
+        GameDAO gameDAO = new MemoryGameDAO();
+
+        this.service = new Service(userDAO, authDAO, gameDAO);
     }
 
-    public Server(UserService userService, AuthService authService, GameService gameService) {
-        this.userService = userService;
-        this.authService = authService;
-        this.gameService = gameService;
-    }
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -79,20 +76,20 @@ public class Server {
 
     private Object register(Request req, Response res) throws DataAccessException {
         var user = new Gson().fromJson(req.body(), UserData.class);
-        String authToken = userService.register(user);
+        String authToken = service.register(user);
         return new Gson().toJson(authToken);
     }
 
     private Object login(Request req, Response res) throws DataAccessException {
         var loginRequest = new Gson().fromJson(req.body(), LoginRequest.class);
-        String authToken = userService.login(loginRequest.username, loginRequest.password);
+        String authToken = service.login(loginRequest.username, loginRequest.password);
         LoginResponse loginResponse = new LoginResponse(authToken, loginRequest.username);
         return new Gson().toJson(loginResponse);
     }
 
     private Object logout (Request req, Response res) throws DataAccessException {
         var authToken = new Gson().fromJson(req.body(), auth.class);
-
+        service.logout(authToken.authorization);
         return "";
     }
 

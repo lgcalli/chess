@@ -2,13 +2,16 @@ package service;
 import model.*;
 import dataAccess.*;
 
-public class UserService {
+public class Service {
     private final UserDAO userDataAccess;
     private final AuthDAO authDataAccess;
+    private final GameDAO gameDataAccess;
 
-    public UserService(UserDAO userDataAccess, AuthDAO authDataAccess) {
+
+    public Service(UserDAO userDataAccess, AuthDAO authDataAccess, GameDAO gameDataAccess) {
         this.userDataAccess = userDataAccess;
         this.authDataAccess = authDataAccess;
+        this.gameDataAccess = gameDataAccess;
     }
 
     public String register(UserData user) throws DataAccessException {
@@ -21,7 +24,7 @@ public class UserService {
 
     public String login(String username, String password) throws DataAccessException {
         if (userDataAccess.getUser(username) == null){
-            throw new DataAccessException(500, "Error: aser does not exist");
+            throw new DataAccessException(500, "Error: user does not exist");
         } else if (!authDataAccess.getAuth(username).isEmpty()){
             throw new DataAccessException(500, "Error: already logged in");
         } else if (userDataAccess.getUser(username).password().equals(password)){
@@ -30,7 +33,13 @@ public class UserService {
             throw new DataAccessException(401, "Error: unauthorized");
         }
     }
-    public void logout(String authtoken) throws DataAccessException {
+    public void logout(String authToken) throws DataAccessException {
+        String username = authDataAccess.getUser(authToken);
+        if (username.isEmpty()){
+            throw new DataAccessException(401, "Error: unauthorized");
+        } else {
+            authDataAccess.deleteAuth(authToken);
+        }
 
     }
 }
