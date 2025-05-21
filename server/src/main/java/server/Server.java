@@ -22,6 +22,11 @@ public class Server {
             String username){
     }
 
+    record auth(
+            String authorization){
+    }
+
+
     public Server() {
     }
 
@@ -43,7 +48,7 @@ public class Server {
         //LOGIN
         Spark.post("/session", this::login);
         //LOGOUT
-        //Spark.delete("/session", this::logout);
+        Spark.delete("/session", this::logout);
         //LIST GAMES
         //Spark.get("/game", this::listGames);
         //CREATE GAME
@@ -51,7 +56,9 @@ public class Server {
         //JOIN GAME
 
         //CLEAR APPLICATION
-
+        //Spark.delete("/db", this::)
+        //EXCEPTION
+        Spark.exception(DataAccessException.class, this::exceptionHandler);
 
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
@@ -63,6 +70,11 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
+    }
+
+    private void exceptionHandler(DataAccessException ex, Request req, Response res) {
+        res.status(ex.StatusCode());
+        res.body(ex.toJson());
     }
 
     private Object register(Request req, Response res) throws DataAccessException {
@@ -78,9 +90,12 @@ public class Server {
         return new Gson().toJson(loginResponse);
     }
 
-    private void logout (Request req, Response res) throws DataAccessException {
+    private Object logout (Request req, Response res) throws DataAccessException {
+        var authToken = new Gson().fromJson(req.body(), auth.class);
 
+        return "";
     }
+
 
 
 
