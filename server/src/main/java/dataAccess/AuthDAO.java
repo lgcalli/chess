@@ -3,7 +3,7 @@ package dataAccess;
 import exception.ResponseException;
 
 public interface AuthDAO {
-    void createAuth (String username) throws ResponseException;
+    String createAuth (String username) throws ResponseException;
 
     String getAuth (String authToken) throws ResponseException;
 
