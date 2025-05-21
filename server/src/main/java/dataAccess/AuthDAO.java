@@ -2,17 +2,14 @@ package dataAccess;
 
 import exception.ResponseException;
 
-public class AuthDAO {
-    String getAuth (String username) throws ResponseException {
-        String auth = "";
+public interface AuthDAO {
+    void createAuth (String username) throws ResponseException;
 
-        return auth;
-    }
-    String createAuth (String username) throws ResponseException {
-        String auth = "";
+    String getAuth (String authToken) throws ResponseException;
 
-        return auth;
-    }
+    void updateAuth (String authToken, String newAuth) throws ResponseException;
 
+    void deleteAuth (String authToken) throws ResponseException;
 
+    void clearAuth () throws ResponseException;
 }
