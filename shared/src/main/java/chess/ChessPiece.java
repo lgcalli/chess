@@ -328,10 +328,10 @@ public class ChessPiece {
                 }
             }
             // Adding moves for diagonal captures
-            int col_left = column - 1;
-            int col_right = column + 1;
-            if (col_left >= 1){
-                ChessPosition position = new ChessPosition(row + 1, col_left);
+            int colLeft = column - 1;
+            int colRight = column + 1;
+            if (colLeft >= 1){
+                ChessPosition position = new ChessPosition(row + 1, colLeft);
                 ChessPiece piece = board.getPiece(position);
                 if (piece != null){
                     if (piece.pieceColor == ChessGame.TeamColor.BLACK){
@@ -346,8 +346,8 @@ public class ChessPiece {
                     }
                 }
             }
-            if (col_right <= 8){
-                ChessPosition position = new ChessPosition(row + 1, col_right);
+            if (colRight <= 8){
+                ChessPosition position = new ChessPosition(row + 1, colRight);
                 ChessPiece piece = board.getPiece(position);
                 if (piece != null){
                     if (piece.pieceColor == ChessGame.TeamColor.BLACK){
@@ -402,10 +402,10 @@ public class ChessPiece {
                 }
             }
             // Adding moves for diagonal captures
-            int col_left = column - 1;
-            int col_right = column + 1;
-            if (col_left >= 1){
-                ChessPosition position = new ChessPosition(row - 1, col_left);
+            int colLeft = column - 1;
+            int colRight = column + 1;
+            if (colLeft >= 1){
+                ChessPosition position = new ChessPosition(row - 1, colLeft);
                 ChessPiece piece = board.getPiece(position);
                 if (piece != null){
                     if (piece.pieceColor == ChessGame.TeamColor.WHITE){
@@ -420,8 +420,8 @@ public class ChessPiece {
                     }
                 }
             }
-            if (col_right <= 8){
-                ChessPosition position = new ChessPosition(row - 1, col_right);
+            if (colRight <= 8){
+                ChessPosition position = new ChessPosition(row - 1, colRight);
                 ChessPiece piece = board.getPiece(position);
                 if (piece != null){
                     if (piece.pieceColor == ChessGame.TeamColor.WHITE){

@@ -1,7 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
-import dataAccess.*;
+import dataaccess.*;
 import model.UserData;
 import model.GameData;
 import java.util.List;
@@ -85,8 +85,8 @@ public class Server {
         //EXCEPTION
         Spark.exception(DataAccessException.class, this::exceptionHandler);
 
-        //This line initializes the server and can be removed once you have a functioning endpoint 
-        Spark.init();
+        //This line initializes the server and can be removed once you have a functioning endpoint
+        // Spark.init();
 
         Spark.awaitInitialization();
         return Spark.port();
@@ -98,7 +98,7 @@ public class Server {
     }
 
     private void exceptionHandler(DataAccessException ex, Request req, Response res) {
-        res.status(ex.StatusCode());
+        res.status(ex.statusCode());
         res.body(ex.toJson());
     }
 
