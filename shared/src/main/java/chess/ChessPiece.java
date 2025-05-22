@@ -353,15 +353,13 @@ public class ChessPiece {
         }
     }
 
-    private void addMovesIfEqualsOne (ChessPosition myPosition, Collection<ChessMove> moves, int row, ChessPosition position) {
-        if (row - 1 == 1) {
-            moves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
-            moves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
-            moves.add(new ChessMove(myPosition, position, PieceType.ROOK));
-            moves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
-        } else {
-            moves.add(new ChessMove(myPosition, position, null));
-        }
+
+
+    private void addPromotionMoves (ChessPosition myPosition, Collection<ChessMove> moves, ChessPosition position){
+        moves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
+        moves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
+        moves.add(new ChessMove(myPosition, position, PieceType.ROOK));
+        moves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
     }
 
     private void duplicate (ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, int row, int colRight) {
@@ -374,12 +372,17 @@ public class ChessPiece {
         }
     }
 
+    private void addMovesIfEqualsOne (ChessPosition myPosition, Collection<ChessMove> moves, int row, ChessPosition position) {
+        if (row - 1 == 1) {
+            addPromotionMoves(myPosition, moves, position);
+        } else {
+            moves.add(new ChessMove(myPosition, position, null));
+        }
+    }
+
     private void addMovesIfEqualEight (ChessPosition myPosition, Collection<ChessMove> moves, int row, ChessPosition position) {
         if (row + 1 == 8) {
-            moves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
-            moves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
-            moves.add(new ChessMove(myPosition, position, PieceType.ROOK));
-            moves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
+            addPromotionMoves(myPosition, moves, position);
         } else {
             moves.add(new ChessMove(myPosition, position, null));
         }
