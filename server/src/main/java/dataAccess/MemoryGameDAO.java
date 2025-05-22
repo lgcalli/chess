@@ -1,6 +1,5 @@
 package dataAccess;
 
-import com.google.gson.Gson;
 import model.GameData;
 import chess.ChessGame;
 
@@ -11,7 +10,7 @@ import java.util.Collection;
 
 public class MemoryGameDAO implements GameDAO{
     final private Collection <GameData> games = new ArrayList<>();
-    final private HashMap <Integer, GameData> gamesByGameID = new HashMap<Integer, GameData>();
+    final private HashMap <Integer, GameData> gamesByGameID = new HashMap<>();
 
     public int createGame(String gameName) {
         var game = new ChessGame();
