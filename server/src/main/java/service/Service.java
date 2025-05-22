@@ -65,7 +65,6 @@ public class Service {
         }
     }
 
-
     public void clearApplication () throws DataAccessException {
         userDataAccess.clearUser();
         authDataAccess.clearAuth();
