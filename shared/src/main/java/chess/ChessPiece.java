@@ -339,40 +339,37 @@ public class ChessPiece {
                 ChessPosition position = new ChessPosition(row - 1, column);
                 ChessPiece piece = board.getPiece(position);
                 if (piece == null) {
-                    if (row - 1 == 1) {
-                        moves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
-                        moves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
-                        moves.add(new ChessMove(myPosition, position, PieceType.ROOK));
-                        moves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
-                    } else {
-                        moves.add(new ChessMove(myPosition, position, null));
-                    }
+                    addMovesIfEqualsOne(myPosition, moves, row, position);
                 }
             }
             int colLeft = column - 1;
             int colRight = column + 1;
             if (colLeft >= 1){
-                addMovesIfEqualOne(board, myPosition, moves, row, colLeft);
+                duplicate(board, myPosition, moves, row, colLeft);
             }
             if (colRight <= 8){
-                addMovesIfEqualOne(board, myPosition, moves, row, colRight);
+                duplicate(board, myPosition, moves, row, colRight);
             }
         }
     }
 
-    private void addMovesIfEqualOne(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, int row, int colRight) {
+    private void addMovesIfEqualsOne (ChessPosition myPosition, Collection<ChessMove> moves, int row, ChessPosition position) {
+        if (row - 1 == 1) {
+            moves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
+            moves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
+            moves.add(new ChessMove(myPosition, position, PieceType.ROOK));
+            moves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
+        } else {
+            moves.add(new ChessMove(myPosition, position, null));
+        }
+    }
+
+    private void duplicate (ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, int row, int colRight) {
         ChessPosition position = new ChessPosition(row - 1, colRight);
         ChessPiece piece = board.getPiece(position);
         if (piece != null){
             if (piece.pieceColor == ChessGame.TeamColor.WHITE){
-                if (row - 1 == 1) {
-                    moves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
-                    moves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
-                    moves.add(new ChessMove(myPosition, position, PieceType.ROOK));
-                    moves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
-                } else {
-                    moves.add(new ChessMove(myPosition, position, null));
-                }
+                addMovesIfEqualsOne(myPosition, moves, row, position);
             }
         }
     }
