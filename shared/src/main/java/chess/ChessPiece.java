@@ -107,9 +107,15 @@ public class ChessPiece {
         //check surrounding spaces above, below, and next to the current position
         for (int i = row - 1; i <= row + 1; i++){
             for (int j = column - 1; j <= column + 1; j++){
-                if (i == row && j == column) continue;
-                if (i < 1 || j < 1) continue;
-                if (i > 8 || j > 8) continue;
+                if (i == row && j == column) {
+                    continue;
+                }
+                if (i < 1 || j < 1) {
+                    continue;
+                }
+                if (i > 8 || j > 8) {
+                    continue;
+                }
                 ChessPosition newPosition = new ChessPosition(i, j);
                 if (board.getPiece(newPosition) == null){
                     ChessMove newMove = new ChessMove(myPosition, newPosition, null);
@@ -287,7 +293,9 @@ public class ChessPiece {
         */
         if (pieceColor == ChessGame.TeamColor.WHITE){
             System.out.println("1");
-            if (row + 1 > 8) return;
+            if (row + 1 > 8) {
+                return;
+            }
             System.out.println("2");
             //if the piece is in its starting position
             // Adding moves for the piece to go 1 - 2 forward depending on whether  it's blocked

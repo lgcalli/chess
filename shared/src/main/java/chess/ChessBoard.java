@@ -45,7 +45,9 @@ public class ChessBoard {
 
     public void deletePiece(ChessPosition position) {
         ChessPiece piece = getPiece(position);
-        if (piece == null) return;
+        if (piece == null) {
+            return;
+        }
         deleteAllPieceColorListByType(piece, position, piece.getTeamColor());
         addPiece(position, null);
     }
@@ -121,7 +123,9 @@ public class ChessBoard {
 
     public ChessPosition getAllPieceColorIndividualByType (ChessPiece.PieceType pieceType, ChessGame.TeamColor color) {
         HashSet<ChessPosition> newSet = getAllPieceColorListByType(pieceType, color);
-        if (newSet.isEmpty()) return null;
+        if (newSet.isEmpty()){
+            return null;
+        }
         return newSet.stream().toList().getFirst();
     }
 
@@ -138,8 +142,12 @@ public class ChessBoard {
 
     public void deleteAllPieceColorListByType (ChessPiece piece, ChessPosition position, ChessGame.TeamColor color) {
         HashSet <ChessPosition> newSet = this.getAllPieceColorListByType(piece.getPieceType(),color);
-        if (newSet == null) return;
-        else newSet.remove(position);
+        if (newSet == null) {
+            return;
+        }
+        else {
+            newSet.remove(position);
+        }
         if (color == ChessGame.TeamColor.WHITE){
             allPieceWhite.put(piece.getPieceType(), newSet);
         } else {

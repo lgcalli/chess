@@ -29,10 +29,14 @@ public class MemoryGameDAO implements GameDAO{
         String black = oldGameData.blackUsername();
 
         if (color == ChessGame.TeamColor.WHITE) {
-            if (white != null) throw new DataAccessException(403, "Error: already has user");
+            if (white != null) {
+                throw new DataAccessException(403, "Error: already has user");
+            }
             white = username;
         } else if (color == ChessGame.TeamColor.BLACK) {
-            if (black != null) throw new DataAccessException(403, "Error: already has user");
+            if (black != null) {
+                throw new DataAccessException(403, "Error: already has user");
+            }
             black = username;
         }
 
