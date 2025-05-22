@@ -5,6 +5,7 @@ import dataAccess.*;
 import model.UserData;
 import service.Service;
 import spark.*;
+import chess.ChessGame;
 
 public class Server {
     private final Service service;
@@ -32,7 +33,12 @@ public class Server {
             String gameName){
     }
     record CreateGameResponse (
-            int gameID){
+            Integer gameID){
+    }
+
+    record JoinGameRequest (
+            ChessGame.TeamColor playerColor,
+            Integer gameID){
     }
 
     public Server() {
@@ -62,7 +68,7 @@ public class Server {
         //CREATE GAME
         Spark.post("/game", this::createGame);
         //JOIN GAME
-
+        Spark.put("/game", this::joinGame);
         //CLEAR APPLICATION
         Spark.delete("/db", this::clearApplication);
         //EXCEPTION
@@ -126,7 +132,7 @@ public class Server {
     private Object createGame (Request req, Response res) throws DataAccessException {
         String authToken = req.headers("authorization");
         if (authToken.isEmpty()){
-            throw new DataAccessException(400, "Error: unauthorized");
+            throw new DataAccessException(401, "Error: unauthorized");
         }
         var createGameRequest = new Gson().fromJson(req.body(), CreateGameRequest.class);
         if (createGameRequest.gameName == null){
@@ -137,10 +143,25 @@ public class Server {
         return new Gson().toJson(createGameResponse);
     }
 
+    private Object joinGame (Request req, Response res) throws DataAccessException {
+        String authToken = req.headers("authorization");
+        if (authToken.isEmpty()){
+            throw new DataAccessException(401, "Error: unauthorized");
+        }
+        var joinGameRequest = new Gson().fromJson(req.body(), JoinGameRequest.class);
+        if (joinGameRequest.playerColor == null || joinGameRequest.gameID == null){
+            throw new DataAccessException(400, "Error: bad request");
+        }
+
+        service.joinGame(joinGameRequest.gameID, authToken, joinGameRequest.playerColor);
+        return "";
+    }
+
     private Object clearApplication (Request req, Response res) throws DataAccessException {
         service.clearApplication();
         return "";
     }
+
 
 
 

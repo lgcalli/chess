@@ -2,6 +2,7 @@ package service;
 import model.*;
 import dataAccess.*;
 import java.util.Collection;
+import chess.ChessGame;
 
 public class Service {
     private final UserDAO userDataAccess;
@@ -51,7 +52,16 @@ public class Service {
         if (username == null || username.isEmpty()){
             throw new DataAccessException(401, "Error: unauthorized");
         } else {
-            return gameDataAccess.createGame(gameName, username);
+            return gameDataAccess.createGame(gameName);
+        }
+    }
+
+    public void joinGame (Integer gameID, String authToken, ChessGame.TeamColor clientColor) throws DataAccessException{
+        String username = authDataAccess.getUser(authToken);
+        if (username == null || username.isEmpty()){
+            throw new DataAccessException(401, "Error: unauthorized");
+        } else {
+            gameDataAccess.updateGame(gameID, username, clientColor);
         }
     }
 
