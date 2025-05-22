@@ -13,12 +13,6 @@ public class MemoryUserDAO implements UserDAO {
     public UserData getUser(String username) {
         return users.get(username);
     }
-    public void updateUser(String username, String password, String newUsername, String newPassword)  {
-
-    }
-    public void deleteUser(String username, String password) {
-
-    }
     public void clearUser() {
         users.clear();
     }

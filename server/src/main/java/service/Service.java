@@ -38,12 +38,15 @@ public class Service {
         String username = authDataAccess.getUser(authToken);
         if (username == null || username.isEmpty()){
             throw new DataAccessException(401, "Error: unauthorized");
-        } else {
-            authDataAccess.deleteAuth(authToken);
         }
+        authDataAccess.deleteAuth(authToken);
     }
 
-    public List<GameData> listGames () throws DataAccessException {
+    public List<GameData> listGames (String authToken) throws DataAccessException {
+        String username = authDataAccess.getUser(authToken);
+        if (username == null || username.isEmpty()){
+            throw new DataAccessException(401, "Error: unauthorized");
+        }
         return gameDataAccess.listGames();
     }
 

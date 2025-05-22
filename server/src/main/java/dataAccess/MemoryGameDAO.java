@@ -22,9 +22,6 @@ public class MemoryGameDAO implements GameDAO{
         gamesByGameID.put(gameID, gameData);
         return gameID;
     }
-    public GameData getGame(int gameID) {
-        return gamesByGameID.get(gameID);
-    }
 
     public void updateGame (int gameID, String username, ChessGame.TeamColor color)  throws DataAccessException {
         GameData oldGameData = gamesByGameID.get(gameID);
@@ -45,14 +42,11 @@ public class MemoryGameDAO implements GameDAO{
         games.add(newGameData);
         gamesByGameID.put(gameID, newGameData);
     }
-    public void deleteGame(int gameID) {
 
-    }
     public List<GameData> listGames() {
-
-
         return games;
     }
+
     public void clearGames() {
         gamesByGameID.clear();
         games.clear();

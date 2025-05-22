@@ -137,7 +137,7 @@ public class Server {
         if (authToken.isEmpty()){
             throw new DataAccessException(401, "Error: unauthorized");
         }
-        return new Gson().toJson(new ListGamesResponse(service.listGames()));
+        return new Gson().toJson(new ListGamesResponse(service.listGames(authToken)));
     }
 
     private Object createGame (Request req, Response res) throws DataAccessException {
