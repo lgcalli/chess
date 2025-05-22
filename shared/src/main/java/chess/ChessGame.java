@@ -140,7 +140,9 @@ public class ChessGame {
         Collection <ChessPosition> opposingEndPositions = board.calculateTeamEndPositions(opposingColor);
         HashSet <ChessMove> teamMoves = board.calculateTeamMovesSet(teamColor);
         for (ChessMove move:teamMoves){
-            if (board.moveGetsBoardOutOfCheck(move, teamColor)) return false;
+            if (board.moveGetsBoardOutOfCheck(move, teamColor)) {
+                return false;
+            }
         }
         if (kingEndPositions.containsAll(opposingEndPositions)) {
             inCheckMate.set(true);

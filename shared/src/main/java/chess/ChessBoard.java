@@ -131,8 +131,12 @@ public class ChessBoard {
 
     public void addAllPieceColorListByType (ChessPiece piece, ChessPosition position, ChessGame.TeamColor color) {
         HashSet <ChessPosition> newSet = this.getAllPieceColorListByType(piece.getPieceType(),color);
-        if (newSet == null) newSet = new HashSet<>();
-        else newSet.add(position);
+        if (newSet == null) {
+            newSet = new HashSet<>();
+        }
+        else {
+            newSet.add(position);
+        }
         if (color == ChessGame.TeamColor.WHITE){
             allPieceWhite.put(piece.getPieceType(), newSet);
         } else {

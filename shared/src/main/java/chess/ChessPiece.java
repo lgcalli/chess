@@ -377,7 +377,9 @@ public class ChessPiece {
             BLACK
         */
         if (pieceColor == ChessGame.TeamColor.BLACK){
-            if (row - 1 < 1) return;
+            if (row - 1 < 1) {
+                return;
+            }
             //if the piece is in its starting position
             // Adding moves for the piece to go 1 - 2 forward depending on whether  it's blocked
             if (row == 7){
