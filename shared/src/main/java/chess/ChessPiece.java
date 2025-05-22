@@ -164,10 +164,8 @@ public class ChessPiece {
             }
             i++; j++;
         }
-        //reset reference variables to one row and column above the starting point
         i = myPosition.getRow() + 1;
         j = myPosition.getColumn() + 1;
-        //check for moves in the bottom left direction
         while (k >= 1 && l >= 1){
             ChessPosition newPosition = new ChessPosition(k, l);
             if (board.getPiece(newPosition) == null){
@@ -182,10 +180,8 @@ public class ChessPiece {
             }
             k--; l--;
         }
-        //reset reference variables to one row and column above the starting point
         k = myPosition.getRow() - 1;
         l = myPosition.getColumn() - 1;
-        //check for moves in the top left direction
         while (i <= 8 && l >= 1){
             ChessPosition newPosition = new ChessPosition(i, l);
             if (board.getPiece(newPosition) == null){
@@ -200,7 +196,6 @@ public class ChessPiece {
             }
             i++; l--;
         }
-        //check for moves in the bottom right direction
         while (k >= 1 &&  j <= 8){
             ChessPosition newPosition = new ChessPosition(k, j);
             if (board.getPiece(newPosition) == null){
@@ -218,12 +213,10 @@ public class ChessPiece {
     }
 
     private void straights (ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
-        //define reference variables
         int i = myPosition.getRow() + 1;
         int j = myPosition.getColumn() + 1;
         int k = myPosition.getRow() - 1;
         int l = myPosition.getColumn() - 1;
-        //check to the right
         while (i <= 8) {
             ChessPosition newPosition = new ChessPosition(i, myPosition.getColumn());
             if (board.getPiece(newPosition) == null){
@@ -238,7 +231,6 @@ public class ChessPiece {
             }
             i++;
         }
-        //check above
         while (j <= 8) {
             ChessPosition newPosition = new ChessPosition(myPosition.getRow(), j);
             if (board.getPiece(newPosition) == null){
@@ -253,7 +245,6 @@ public class ChessPiece {
             }
             j++;
         }
-        //check to the left
         while (k >= 1) {
             ChessPosition newPosition = new ChessPosition(k, myPosition.getColumn());
             if (board.getPiece(newPosition) == null){
@@ -268,7 +259,6 @@ public class ChessPiece {
             }
             k--;
         }
-        //check below
         while (l >= 1) {
             ChessPosition newPosition = new ChessPosition(myPosition.getRow(), l);
             if (board.getPiece(newPosition) == null){
@@ -288,54 +278,27 @@ public class ChessPiece {
     private void pawn (ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
         int row = myPosition.getRow();
         int column = myPosition.getColumn();
-        /*
-            WHITE
-        */
         if (pieceColor == ChessGame.TeamColor.WHITE){
-            System.out.println("1");
             if (row + 1 > 8) {
                 return;
             }
-            System.out.println("2");
-            //if the piece is in its starting position
-            // Adding moves for the piece to go 1 - 2 forward depending on whether  it's blocked
             if (row == 2){
-                System.out.println("3");
                 for (int i = 1; i <= 2; i++){
-                    System.out.println("4");
                     ChessPosition position = new ChessPosition (row + i, column);
                     ChessPiece piece = board.getPiece(position);
                     if (piece == null){
-                        System.out.println("5");
-                        //if there is nothing in the spot
                         moves.add(new ChessMove(myPosition, position, null));
                     } else {
-                        System.out.println("6");
-                        //if the spot has a piece in it
                         break;
                     }
                 }
-            }
-            //otherwise
-            // Adding move for the piece to go 1 forward depending on whether it's blocked
-            else {
-                System.out.println("7");
+            } else {
                 ChessPosition position = new ChessPosition(row + 1, column);
                 ChessPiece piece = board.getPiece(position);
                 if (piece == null) {
-                    System.out.println("8");
-                    if (row + 1 == 8) {
-                        System.out.println("9");
-                        moves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
-                        moves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
-                        moves.add(new ChessMove(myPosition, position, PieceType.ROOK));
-                        moves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
-                    } else {
-                        moves.add(new ChessMove(myPosition, position, null));
-                    }
+                    addMovesIfEqualEight(myPosition, moves, row, position);
                 }
             }
-            // Adding moves for diagonal captures
             int colLeft = column - 1;
             int colRight = column + 1;
             if (colLeft >= 1){
@@ -343,14 +306,7 @@ public class ChessPiece {
                 ChessPiece piece = board.getPiece(position);
                 if (piece != null){
                     if (piece.pieceColor == ChessGame.TeamColor.BLACK){
-                        if (row + 1 == 8) {
-                            moves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
-                            moves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
-                            moves.add(new ChessMove(myPosition, position, PieceType.ROOK));
-                            moves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
-                        } else {
-                            moves.add(new ChessMove(myPosition, position, null));
-                        }
+                        addMovesIfEqualEight(myPosition, moves, row, position);
                     }
                 }
             }
@@ -359,47 +315,29 @@ public class ChessPiece {
                 ChessPiece piece = board.getPiece(position);
                 if (piece != null){
                     if (piece.pieceColor == ChessGame.TeamColor.BLACK){
-                        if (row + 1 == 8) {
-                            moves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
-                            moves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
-                            moves.add(new ChessMove(myPosition, position, PieceType.ROOK));
-                            moves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
-                        } else {
-                            System.out.println("19");
-                            moves.add(new ChessMove(myPosition, position, null));
-                        }
+                        addMovesIfEqualEight(myPosition, moves, row, position);
                     }
                 }
             }
 
         }
-        /*
-            BLACK
-        */
         if (pieceColor == ChessGame.TeamColor.BLACK){
             if (row - 1 < 1) {
                 return;
             }
-            //if the piece is in its starting position
-            // Adding moves for the piece to go 1 - 2 forward depending on whether  it's blocked
             if (row == 7){
                 for (int i = 1; i <= 2; i++){
                     ChessPosition position = new ChessPosition (row - i, column);
                     ChessPiece piece = board.getPiece(position);
                     if (piece == null){
-                        //if there is nothing in the spot
                         moves.add(new ChessMove(myPosition, position, null));
                     } else {
-                        //if the spot has a piece in it
                         break;
                     }
                 }
-            }
-            // Adding move for the piece to go 1 forward depending on whether it's blocked
-            else {
+            } else {
                 ChessPosition position = new ChessPosition(row - 1, column);
                 ChessPiece piece = board.getPiece(position);
-                //if there is nothing in the spot
                 if (piece == null) {
                     if (row - 1 == 1) {
                         moves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
@@ -411,41 +349,42 @@ public class ChessPiece {
                     }
                 }
             }
-            // Adding moves for diagonal captures
             int colLeft = column - 1;
             int colRight = column + 1;
             if (colLeft >= 1){
-                ChessPosition position = new ChessPosition(row - 1, colLeft);
-                ChessPiece piece = board.getPiece(position);
-                if (piece != null){
-                    if (piece.pieceColor == ChessGame.TeamColor.WHITE){
-                        if (row - 1 == 1) {
-                            moves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
-                            moves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
-                            moves.add(new ChessMove(myPosition, position, PieceType.ROOK));
-                            moves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
-                        } else {
-                            moves.add(new ChessMove(myPosition, position, null));
-                        }
-                    }
-                }
+                addMovesIfEqualOne(board, myPosition, moves, row, colLeft);
             }
             if (colRight <= 8){
-                ChessPosition position = new ChessPosition(row - 1, colRight);
-                ChessPiece piece = board.getPiece(position);
-                if (piece != null){
-                    if (piece.pieceColor == ChessGame.TeamColor.WHITE){
-                        if (row - 1 == 1) {
-                            moves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
-                            moves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
-                            moves.add(new ChessMove(myPosition, position, PieceType.ROOK));
-                            moves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
-                        } else {
-                            moves.add(new ChessMove(myPosition, position, null));
-                        }
-                    }
+                addMovesIfEqualOne(board, myPosition, moves, row, colRight);
+            }
+        }
+    }
+
+    private void addMovesIfEqualOne(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, int row, int colRight) {
+        ChessPosition position = new ChessPosition(row - 1, colRight);
+        ChessPiece piece = board.getPiece(position);
+        if (piece != null){
+            if (piece.pieceColor == ChessGame.TeamColor.WHITE){
+                if (row - 1 == 1) {
+                    moves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
+                    moves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
+                    moves.add(new ChessMove(myPosition, position, PieceType.ROOK));
+                    moves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
+                } else {
+                    moves.add(new ChessMove(myPosition, position, null));
                 }
             }
+        }
+    }
+
+    private void addMovesIfEqualEight (ChessPosition myPosition, Collection<ChessMove> moves, int row, ChessPosition position) {
+        if (row + 1 == 8) {
+            moves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
+            moves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
+            moves.add(new ChessMove(myPosition, position, PieceType.ROOK));
+            moves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
+        } else {
+            moves.add(new ChessMove(myPosition, position, null));
         }
     }
 }
