@@ -3,10 +3,8 @@ package server;
 import com.google.gson.Gson;
 import dataAccess.*;
 import model.UserData;
-import org.eclipse.jetty.server.Authentication;
 import service.Service;
 import spark.*;
-import service.*;
 
 public class Server {
     private final Service service;
@@ -29,6 +27,12 @@ public class Server {
     record LoginResponse(
             String authToken,
             String username){
+    }
+    record CreateGameRequest (
+            String gameName){
+    }
+    record CreateGameResponse (
+            int gameID){
     }
 
     public Server() {
@@ -54,9 +58,9 @@ public class Server {
         //LOGOUT
         Spark.delete("/session", this::logout);
         //LIST GAMES
-        //Spark.get("/game", this::listGames);
+        Spark.get("/game", this::listGames);
         //CREATE GAME
-
+        Spark.post("/game", this::createGame);
         //JOIN GAME
 
         //CLEAR APPLICATION
@@ -109,6 +113,28 @@ public class Server {
         }
         service.logout(authToken);
         return "";
+    }
+
+    private Object listGames (Request req, Response res) throws DataAccessException {
+        String authToken = req.headers("authorization");
+        if (authToken.isEmpty()){
+            throw new DataAccessException(401, "Error: unauthorized");
+        }
+        return new Gson().toJson(service.listGames());
+    }
+
+    private Object createGame (Request req, Response res) throws DataAccessException {
+        String authToken = req.headers("authorization");
+        if (authToken.isEmpty()){
+            throw new DataAccessException(400, "Error: unauthorized");
+        }
+        var createGameRequest = new Gson().fromJson(req.body(), CreateGameRequest.class);
+        if (createGameRequest.gameName == null){
+            throw new DataAccessException(400, "Error: bad request");
+        }
+        int gameID = service.createGame(authToken, createGameRequest.gameName);
+        CreateGameResponse createGameResponse = new CreateGameResponse(gameID);
+        return new Gson().toJson(createGameResponse);
     }
 
     private Object clearApplication (Request req, Response res) throws DataAccessException {

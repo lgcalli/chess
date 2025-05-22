@@ -1,6 +1,7 @@
 package service;
 import model.*;
 import dataAccess.*;
+import java.util.Collection;
 
 public class Service {
     private final UserDAO userDataAccess;
@@ -40,6 +41,20 @@ public class Service {
         }
 
     }
+
+    public Collection<GameData> listGames () throws DataAccessException {
+        return gameDataAccess.listGames();
+    }
+
+    public int createGame (String authToken, String gameName) throws DataAccessException {
+        String username = authDataAccess.getUser(authToken);
+        if (username == null || username.isEmpty()){
+            throw new DataAccessException(401, "Error: unauthorized");
+        } else {
+            return gameDataAccess.createGame(gameName, username);
+        }
+    }
+
 
     public void clearApplication () throws DataAccessException {
         userDataAccess.clearUser();
