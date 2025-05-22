@@ -24,9 +24,7 @@ public class Service {
 
     public String login(String username, String password) throws DataAccessException {
         if (userDataAccess.getUser(username) == null){
-            throw new DataAccessException(500, "Error: user does not exist");
-        } else if (!authDataAccess.getAuth(username).isEmpty()){
-            throw new DataAccessException(500, "Error: already logged in");
+            throw new DataAccessException(401, "Error: unauthorized");
         } else if (userDataAccess.getUser(username).password().equals(password)){
             return authDataAccess.createAuth(username);
         } else {
@@ -35,11 +33,17 @@ public class Service {
     }
     public void logout(String authToken) throws DataAccessException {
         String username = authDataAccess.getUser(authToken);
-        if (username.isEmpty()){
+        if (username == null || username.isEmpty()){
             throw new DataAccessException(401, "Error: unauthorized");
         } else {
             authDataAccess.deleteAuth(authToken);
         }
 
+    }
+
+    public void clearApplication () throws DataAccessException {
+        userDataAccess.clearUser();
+        authDataAccess.clearAuth();
+        gameDataAccess.clearGames();
     }
 }

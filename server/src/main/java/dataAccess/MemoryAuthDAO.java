@@ -32,6 +32,7 @@ public class MemoryAuthDAO implements AuthDAO {
         user_to_auth.remove(username, authToken);
     }
     public void clearAuth()  {
-
+        auth_to_user.clear();
+        user_to_auth.clear();
     }
 }

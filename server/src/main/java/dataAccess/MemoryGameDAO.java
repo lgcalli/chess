@@ -3,10 +3,12 @@ package dataAccess;
 import chess.ChessGame;
 import model.GameData;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class MemoryGameDAO implements GameDAO{
+    final private Collection <ChessGame> games = new ArrayList<>();
 
     public void createGame(String gameName, String username) {
 
@@ -24,6 +26,6 @@ public class MemoryGameDAO implements GameDAO{
         return List.of();
     }
     public void clearGames() {
-
+        games.clear();
     }
 }
