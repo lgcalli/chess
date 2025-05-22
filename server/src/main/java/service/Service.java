@@ -1,7 +1,8 @@
 package service;
 import model.*;
 import dataAccess.*;
-import java.util.Collection;
+import java.util.List;
+
 import chess.ChessGame;
 
 public class Service {
@@ -40,10 +41,9 @@ public class Service {
         } else {
             authDataAccess.deleteAuth(authToken);
         }
-
     }
 
-    public Collection<GameData> listGames () throws DataAccessException {
+    public List<GameData> listGames () throws DataAccessException {
         return gameDataAccess.listGames();
     }
 

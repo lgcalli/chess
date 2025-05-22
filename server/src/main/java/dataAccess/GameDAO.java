@@ -3,7 +3,7 @@ package dataAccess;
 import chess.ChessGame;
 import model.GameData;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface GameDAO {
     int createGame (String gameName) throws DataAccessException;
@@ -14,7 +14,7 @@ public interface GameDAO {
 
     void deleteGame (int gameID) throws DataAccessException;
 
-    Collection<GameData> listGames () throws DataAccessException;
+    List<GameData> listGames () throws DataAccessException;
 
     void clearGames () throws DataAccessException;
 }

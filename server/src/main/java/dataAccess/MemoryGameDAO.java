@@ -3,17 +3,15 @@ package dataAccess;
 import model.GameData;
 import chess.ChessGame;
 
-import java.util.HashMap;
-import java.util.Random;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 public class MemoryGameDAO implements GameDAO{
-    final private Collection <GameData> games = new ArrayList<>();
+    final private List <GameData> games = new ArrayList<>();
     final private HashMap <Integer, GameData> gamesByGameID = new HashMap<>();
 
     public int createGame(String gameName) {
         var game = new ChessGame();
+
         Random random = new Random();
         int gameID = random.nextInt(10000);
         while (gamesByGameID.get(gameID) != null){
@@ -30,8 +28,8 @@ public class MemoryGameDAO implements GameDAO{
 
     public void updateGame (int gameID, String username, ChessGame.TeamColor color) {
         GameData gameData = gamesByGameID.get(gameID);
-        gamesByGameID.remove(gameID);
         games.remove(gameData);
+        gamesByGameID.remove(gameID, gameData);
         if (color == ChessGame.TeamColor.WHITE){
             gameData.setWhiteUser(username);
         } else if (color == ChessGame.TeamColor.BLACK){
@@ -43,7 +41,9 @@ public class MemoryGameDAO implements GameDAO{
     public void deleteGame(int gameID) {
 
     }
-    public Collection<GameData> listGames() {
+    public List<GameData> listGames() {
+
+
         return games;
     }
     public void clearGames() {

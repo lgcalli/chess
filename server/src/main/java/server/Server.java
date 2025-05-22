@@ -3,9 +3,12 @@ package server;
 import com.google.gson.Gson;
 import dataAccess.*;
 import model.UserData;
+import model.GameData;
+import java.util.List;
 import service.Service;
 import spark.*;
 import chess.ChessGame;
+
 
 public class Server {
     private final Service service;
@@ -39,6 +42,14 @@ public class Server {
     record JoinGameRequest (
             ChessGame.TeamColor playerColor,
             Integer gameID){
+    }
+
+    public static class ListGamesResponse {
+        public List<GameData> games;
+
+        public ListGamesResponse(List<GameData> games) {
+            this.games = games;
+        }
     }
 
     public Server() {
@@ -126,7 +137,7 @@ public class Server {
         if (authToken.isEmpty()){
             throw new DataAccessException(401, "Error: unauthorized");
         }
-        return new Gson().toJson(service.listGames());
+        return new Gson().toJson(new ListGamesResponse(service.listGames()));
     }
 
     private Object createGame (Request req, Response res) throws DataAccessException {
