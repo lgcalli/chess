@@ -1,6 +1,8 @@
 package dataaccess;
 
 import java.sql.*;
+import java.util.UUID;
+
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
@@ -11,6 +13,8 @@ public class MySqlAuthDAO implements AuthDAO {
     }
 
     public String createAuth(String username) throws DataAccessException {
+
+        String authToken = UUID.randomUUID().toString();
         return "";
     }
 
@@ -26,16 +30,14 @@ public class MySqlAuthDAO implements AuthDAO {
 
     }
 
+
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS  auth (
+              `authToken` varchar(256) NOT NULL,
               `username` varchar(256) NOT NULL,
-              `password` varchar(256) NOT NULL,
-              `email` varchar(256) NOT NULL,
-              `json` TEXT DEFAULT NULL,
-              PRIMARY KEY (`id`),
-              INDEX(type),
-              INDEX(name)
+              PRIMARY KEY (`authToken`),
+              INDEX(username)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
