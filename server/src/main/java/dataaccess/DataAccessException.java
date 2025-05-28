@@ -8,7 +8,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DataAccessException extends Exception {
-    private final int statusCode;
+    private int statusCode;
+
+    public DataAccessException(String message) {
+        super(message);
+    }
+    public DataAccessException(String message, Throwable ex) {
+        super(message, ex);
+    }
 
     public DataAccessException(int statusCode, String message) {
         super(message);
