@@ -4,12 +4,17 @@ import model.UserData;
 
 import java.sql.*;
 
-import org.eclipse.jetty.server.Authentication;
 import org.mindrot.jbcrypt.BCrypt;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
 public class MySqlUserDAO implements UserDAO {
+    SharedDatabase db;
+
+    public MySqlUserDAO(SharedDatabase db){
+        this.db = db;
+    }
+
 
     public void createUser(UserData user) throws DataAccessException {
         String username = user.username();
@@ -19,7 +24,7 @@ public class MySqlUserDAO implements UserDAO {
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
         var statement = "INSERT INTO user (username, password, email) VALUES (?, ?,?)";
-        executeUpdate(statement, username, hashedPassword, email);
+        db.executeUpdate(statement, username, hashedPassword, email);
     }
 
     public boolean verifyUser(String username, String providedClearTextPassword) throws DataAccessException {
@@ -69,29 +74,7 @@ public class MySqlUserDAO implements UserDAO {
 
     public void clearUser() throws DataAccessException {
         var statement = "TRUNCATE user";
-        executeUpdate(statement);
+        db.executeUpdate(statement);
     }
 
-    private int executeUpdate(String statement, Object... params) throws DataAccessException {
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
-                for (var i = 0; i < params.length; i++) {
-                    var param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                    else if (param == null) ps.setNull(i + 1, NULL);
-                }
-                ps.executeUpdate();
-
-                var rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-
-                return 0;
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(500, String.format("unable to update database: %s, %s", statement, e.getMessage()));
-        }
-    }
 }

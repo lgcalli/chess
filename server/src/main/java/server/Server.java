@@ -5,6 +5,7 @@ import dataaccess.*;
 import model.UserData;
 import model.GameData;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import service.Service;
@@ -55,10 +56,6 @@ public class Server {
     }
 
     public Server() {
-        //UserDAO userDAO = new MemoryUserDAO();
-        //AuthDAO authDAO = new MemoryAuthDAO();
-        //GameDAO gameDAO = new MemoryGameDAO();
-
         SharedDatabase database = new SharedDatabase();
         try {
             database.configureDatabase();
@@ -66,9 +63,9 @@ public class Server {
             throw new RuntimeException(e);
         }
 
-        UserDAO userDAO = new MySqlUserDAO();
-        AuthDAO authDAO = new MySqlAuthDAO();
-        GameDAO gameDAO = new MySqlGameDAO();
+        UserDAO userDAO = new MySqlUserDAO(database);
+        AuthDAO authDAO = new MySqlAuthDAO(database);
+        GameDAO gameDAO = new MySqlGameDAO(database);
 
 
         this.service = new Service(userDAO, authDAO, gameDAO);
@@ -99,6 +96,7 @@ public class Server {
         Spark.delete("/db", this::clearApplication);
         //EXCEPTION
         Spark.exception(DataAccessException.class, this::exceptionHandler);
+
 
         //This line initializes the server and can be removed once you have a functioning endpoint
         // Spark.init();
