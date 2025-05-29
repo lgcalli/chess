@@ -6,7 +6,7 @@ import chess.ChessGame;
 import java.util.*;
 
 public class MemoryGameDAO implements GameDAO{
-    final private List <GameData> games = new ArrayList<>();
+    final private Collection <GameData> games = new ArrayList<>();
     final private HashMap <Integer, GameData> gamesByGameID = new HashMap<>();
 
     public int createGame(String gameName) {
@@ -47,7 +47,7 @@ public class MemoryGameDAO implements GameDAO{
         gamesByGameID.put(gameID, newGameData);
     }
 
-    public List<GameData> listGames() {
+    public Collection<GameData> listGames() {
         return games;
     }
 

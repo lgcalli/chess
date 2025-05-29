@@ -1,6 +1,8 @@
 package service;
 import model.*;
 import dataaccess.*;
+
+import java.util.Collection;
 import java.util.List;
 
 import chess.ChessGame;
@@ -42,7 +44,7 @@ public class Service {
         authDataAccess.deleteAuth(authToken);
     }
 
-    public List<GameData> listGames (String authToken) throws DataAccessException {
+    public Collection<GameData> listGames (String authToken) throws DataAccessException {
         String username = authDataAccess.getUser(authToken);
         if (username == null || username.isEmpty()){
             throw new DataAccessException(401, "Error: unauthorized");

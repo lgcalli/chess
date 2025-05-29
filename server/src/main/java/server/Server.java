@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import dataaccess.*;
 import model.UserData;
 import model.GameData;
+
+import java.util.Collection;
 import java.util.List;
 import service.Service;
 import spark.*;
@@ -45,17 +47,17 @@ public class Server {
     }
 
     public static class ListGamesResponse {
-        public List<GameData> games;
+        public Collection<GameData> games;
 
-        public ListGamesResponse(List<GameData> games) {
+        public ListGamesResponse(Collection<GameData> games) {
             this.games = games;
         }
     }
 
     public Server() {
-        /* UserDAO userDAO = new MemoryUserDAO();
-        AuthDAO authDAO = new MemoryAuthDAO();
-        GameDAO gameDAO = new MemoryGameDAO(); */
+        //UserDAO userDAO = new MemoryUserDAO();
+        //AuthDAO authDAO = new MemoryAuthDAO();
+        //GameDAO gameDAO = new MemoryGameDAO();
 
         SharedDatabase database = new SharedDatabase();
         try {
