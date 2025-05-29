@@ -3,6 +3,4 @@ public class Main {
         var server = new server.Server();
         server.run(8080);
     }
-
-
 }

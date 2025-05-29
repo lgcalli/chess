@@ -8,10 +8,6 @@ import static java.sql.Types.NULL;
 
 public class MySqlAuthDAO implements AuthDAO {
 
-    public MySqlAuthDAO() throws DataAccessException {
-        configureAuthDatabase();
-    }
-
     public String createAuth(String username) throws DataAccessException {
         String authToken = UUID.randomUUID().toString();
         var statement = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
@@ -66,30 +62,6 @@ public class MySqlAuthDAO implements AuthDAO {
             }
         } catch (SQLException e) {
             throw new DataAccessException(500, String.format("unable to update database: %s, %s", statement, e.getMessage()));
-        }
-    }
-
-    private final String[] createStatements = {
-            """
-            CREATE TABLE IF NOT EXISTS  auth (
-              `authToken` varchar(256) NOT NULL,
-              `username` varchar(256) NOT NULL,
-              PRIMARY KEY (`authToken`),
-              INDEX(username)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-            """
-    };
-
-    private void configureAuthDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(500, String.format("Unable to configure database: %s", ex.getMessage()));
         }
     }
 }

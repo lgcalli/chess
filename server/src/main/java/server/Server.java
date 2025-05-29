@@ -53,11 +53,24 @@ public class Server {
     }
 
     public Server() {
-        UserDAO userDAO = new MemoryUserDAO();
+        /* UserDAO userDAO = new MemoryUserDAO();
         AuthDAO authDAO = new MemoryAuthDAO();
-        GameDAO gameDAO = new MemoryGameDAO();
+        GameDAO gameDAO = new MemoryGameDAO(); */
+
+        SharedDatabase database = new SharedDatabase();
+        try {
+            database.configureDatabase();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        UserDAO userDAO = new MySqlUserDAO();
+        AuthDAO authDAO = new MySqlAuthDAO();
+        GameDAO gameDAO = new MySqlGameDAO();
+
 
         this.service = new Service(userDAO, authDAO, gameDAO);
+
     }
 
 
@@ -125,7 +138,7 @@ public class Server {
 
     private Object logout (Request req, Response res) throws DataAccessException {
         String authToken = req.headers("authorization");
-        if (authToken.isEmpty()){
+        if (authToken == null || authToken.isEmpty()){
             throw new DataAccessException(401, "Error: unauthorized");
         }
         service.logout(authToken);
@@ -142,7 +155,7 @@ public class Server {
 
     private Object createGame (Request req, Response res) throws DataAccessException {
         String authToken = req.headers("authorization");
-        if (authToken.isEmpty()){
+        if (authToken == null || authToken.isEmpty()){
             throw new DataAccessException(401, "Error: unauthorized");
         }
         var createGameRequest = new Gson().fromJson(req.body(), CreateGameRequest.class);
@@ -156,7 +169,7 @@ public class Server {
 
     private Object joinGame (Request req, Response res) throws DataAccessException {
         String authToken = req.headers("authorization");
-        if (authToken.isEmpty()){
+        if (authToken == null || authToken.isEmpty()){
             throw new DataAccessException(401, "Error: unauthorized");
         }
         var joinGameRequest = new Gson().fromJson(req.body(), JoinGameRequest.class);

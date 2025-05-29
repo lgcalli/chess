@@ -3,25 +3,72 @@ package dataaccess;
 import model.UserData;
 
 import java.sql.*;
+
+import org.eclipse.jetty.server.Authentication;
+import org.mindrot.jbcrypt.BCrypt;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
 public class MySqlUserDAO implements UserDAO {
 
-    public MySqlUserDAO() throws DataAccessException {
-        configureUserDatabase();
+    public void createUser(UserData user) throws DataAccessException {
+        String username = user.username();
+        String password = user.password();
+        String email = user.email();
+
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+
+        var statement = "INSERT INTO user (username, password, email) VALUES (?, ?,?)";
+        executeUpdate(statement, username, hashedPassword, email);
     }
 
-    public void createUser(UserData user) throws DataAccessException {
+    public boolean verifyUser(String username, String providedClearTextPassword) throws DataAccessException {
+        String hashedPassword = null;
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT password FROM user WHERE username=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        hashedPassword = rs.getString("password");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(500, String.format("Unable to read data: %s", e.getMessage()));
+        }
 
+        if (hashedPassword == null) {
+            throw new DataAccessException(401, "Error: unauthorized");
+        }
+        return BCrypt.checkpw(providedClearTextPassword, hashedPassword);
     }
 
     public UserData getUser(String username) throws DataAccessException {
-        return null;
+        String password = "";
+        String email = "";
+
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM user WHERE username=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                       password = rs.getString("password");
+                       email = rs.getString("password");
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(500, String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return new UserData(username, password, email);
     }
 
     public void clearUser() throws DataAccessException {
-        var statement = "TRUNCATE game";
+        var statement = "TRUNCATE user";
         executeUpdate(statement);
     }
 
@@ -47,29 +94,4 @@ public class MySqlUserDAO implements UserDAO {
             throw new DataAccessException(500, String.format("unable to update database: %s, %s", statement, e.getMessage()));
         }
     }
-
-    private final String[] createStatements = {
-            """
-            CREATE TABLE IF NOT EXISTS  user (
-              `username` varchar(256) NOT NULL,
-              `password` varchar(256) NOT NULL,
-              `email` varchar(256) NOT NULL,
-              PRIMARY KEY (`username`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-            """
-    };
-
-    private void configureUserDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(500, String.format("Unable to configure database: %s", ex.getMessage()));
-        }
-    }
-
 }

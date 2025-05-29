@@ -28,7 +28,7 @@ public class Service {
     public String login(String username, String password) throws DataAccessException {
         if (userDataAccess.getUser(username) == null){
             throw new DataAccessException(401, "Error: unauthorized");
-        } else if (userDataAccess.getUser(username).password().equals(password)){
+        } else if (userDataAccess.verifyUser(username, password)){
             return authDataAccess.createAuth(username);
         } else {
             throw new DataAccessException(401, "Error: unauthorized");
