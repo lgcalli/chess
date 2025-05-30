@@ -1,11 +1,6 @@
 package dataaccess;
 
-import java.sql.*;
 import java.util.UUID;
-import dataaccess.*;
-
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static java.sql.Types.NULL;
 
 public class MySqlAuthDAO implements AuthDAO {
     SharedDatabase db;
@@ -13,7 +8,6 @@ public class MySqlAuthDAO implements AuthDAO {
     public MySqlAuthDAO(SharedDatabase db){
         this.db = db;
     }
-
 
     public String createAuth(String username) throws DataAccessException {
         String authToken = UUID.randomUUID().toString();

@@ -5,9 +5,7 @@ import dataaccess.*;
 import model.UserData;
 import model.GameData;
 
-import java.sql.SQLException;
 import java.util.Collection;
-import java.util.List;
 import service.Service;
 import spark.*;
 import chess.ChessGame;

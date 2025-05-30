@@ -3,7 +3,6 @@ import model.*;
 import dataaccess.*;
 
 import java.util.Collection;
-import java.util.List;
 
 import chess.ChessGame;
 

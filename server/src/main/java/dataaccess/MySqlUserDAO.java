@@ -1,12 +1,7 @@
 package dataaccess;
 
 import model.UserData;
-
-import java.sql.*;
-
 import org.mindrot.jbcrypt.BCrypt;
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static java.sql.Types.NULL;
 
 public class MySqlUserDAO implements UserDAO {
     SharedDatabase db;
