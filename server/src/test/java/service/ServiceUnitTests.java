@@ -67,7 +67,7 @@ public class ServiceUnitTests {
     //logout positive
     @Test
     @DisplayName("Logout User")
-    public void LogoutUser () throws DataAccessException {
+    public void logoutUser () throws DataAccessException {
         UserData newUser = new UserData("bob123", "bob's_password", "bob@hotmail.com");
         var authToken = service.register(newUser);
         Assertions.assertDoesNotThrow(() -> service.logout(authToken));
@@ -76,7 +76,7 @@ public class ServiceUnitTests {
     //logout negative
     @Test
     @DisplayName("Logout Already Logged Out")
-    public void LogoutUserInvalid () throws DataAccessException {
+    public void logoutUserInvalid () throws DataAccessException {
         UserData newUser = new UserData("bob123", "bob's_password", "bob@hotmail.com");
         var authToken = service.register(newUser);
         service.logout(authToken);
@@ -87,7 +87,7 @@ public class ServiceUnitTests {
     //list games positive
     @Test
     @DisplayName("List Games")
-    public void ListGames () throws DataAccessException {
+    public void listGames () throws DataAccessException {
         UserData newUser = new UserData("bob123", "bob's_password", "bob@hotmail.com");
         var authToken = service.register(newUser);
         service.createGame(authToken, "newGame");
@@ -97,7 +97,7 @@ public class ServiceUnitTests {
     //list games negative
     @Test
     @DisplayName("List Games Invalid Auth")
-    public void ListGamesInvalidAuth () throws DataAccessException {
+    public void listGamesInvalidAuth () throws DataAccessException {
         var authToken = "myInvalidAuthToken";
         Assertions.assertThrows(DataAccessException.class, () ->
                 service.listGames(authToken));
@@ -106,7 +106,7 @@ public class ServiceUnitTests {
     //create game positive
     @Test
     @DisplayName("Create Game")
-    public void CreateGame () throws DataAccessException {
+    public void createGame () throws DataAccessException {
         UserData newUser = new UserData("bob123", "bob's_password", "bob@hotmail.com");
         var authToken = service.register(newUser);
         service.createGame(authToken, "newGame");
@@ -116,7 +116,7 @@ public class ServiceUnitTests {
     //create game negative
     @Test
     @DisplayName("Create Game Invalid Auth")
-    public void CreateGameInvalidAuth () throws DataAccessException {
+    public void createGameInvalidAuth () throws DataAccessException {
         var authToken = "myInvalidAuthToken";
         Assertions.assertThrows(DataAccessException.class, () ->
                 service.createGame(authToken, "newGame"));
@@ -125,7 +125,7 @@ public class ServiceUnitTests {
     //join game positive
     @Test
     @DisplayName("Join Game")
-    public void JoinGame () throws DataAccessException {
+    public void joinGame () throws DataAccessException {
         UserData newUser = new UserData("bob123", "bob's_password", "bob@hotmail.com");
         var authToken = service.register(newUser);
         var id = service.createGame(authToken, "newGame");
@@ -140,7 +140,7 @@ public class ServiceUnitTests {
     //join game negative
     @Test
     @DisplayName("Join Game Color Taken")
-    public void JoinGameColorTaken () throws DataAccessException {
+    public void joinGameColorTaken () throws DataAccessException {
         UserData newUser = new UserData("bob123", "bob's_password", "bob@hotmail.com");
         var authToken = service.register(newUser);
         newUser = new UserData("jessie1345", "jessie's_password", "jessie@hotmail.com");
@@ -154,7 +154,7 @@ public class ServiceUnitTests {
     //clear application positive
     @Test
     @DisplayName("Clear Application")
-    public void ClearApplication () throws DataAccessException {
+    public void clearApplication () throws DataAccessException {
         UserData newUser = new UserData("bob123", "bob's_password", "bob@hotmail.com");
         var authToken = service.register(newUser);
         service.createGame(authToken, "newGame");
