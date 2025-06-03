@@ -1,0 +1,113 @@
+package dataaccess;
+
+import model.UserData;
+import dataaccess.DatabaseManager;
+import org.eclipse.jetty.server.Authentication;
+import org.junit.jupiter.api.*;
+import passoff.model.TestUser;
+import passoff.server.TestServerFacade;
+import server.Server;
+import service.Service;
+
+import java.sql.SQLException;
+
+public class DataAccessUnitTests {
+    private static final UserData user = new UserData("ExistingUser", "existingUserPassword", "eu@mail.com");
+    private AuthDAO authDAO;
+    private UserDAO userDAO;
+    private GameDAO gameDAO;
+    private SharedDatabase db;
+
+    @BeforeEach
+    public void setUp() {
+        db = new SharedDatabase();
+        authDAO = new MySqlAuthDAO(db);
+        userDAO = new MySqlUserDAO(db);
+        gameDAO = new MySqlGameDAO(db);
+    }
+
+    /*
+        AUTH DAO
+    */
+
+    //createAuth (Positive)
+    @Test
+    @DisplayName("CreateAuth")
+    public void createAuthTest () throws DataAccessException {
+        String username = "helloThere";
+        String authToken = authDAO.createAuth(username);
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT username FROM auth WHERE authToken=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, authToken);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        username = rs.getString("username");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(500, String.format("Unable to read data: %s", e.getMessage()));
+        }
+        Assertions.assertEquals(username, "helloThere");
+    }
+
+    //createAuth (Negative)
+    @Test
+    @DisplayName("CreateAuthTwice")
+    public void createAuthTwice () throws DataAccessException {
+
+    }
+
+    //getUser (Positive)
+    @Test
+    @DisplayName("GetUser")
+    public void getUserTest () throws DataAccessException {
+
+    }
+
+    //getUser (Negative)
+
+    //deleteAuth (Positive)
+
+    //deleteAuth (Negative)
+
+    //clearAuth (Positive)
+
+    /*
+        USER DAO
+    */
+
+    //createUser (Positive)
+
+    //createUser (Negative)
+
+    //verifyUser (Positive)
+
+    //verifyUser (Negative)
+
+    //getUser (Positive)
+
+    //getUser (Negative)
+
+    //clearUser (Positive)
+
+    /*
+        GAME DAO
+    */
+
+    //createGame (Positive)
+
+    //createGame (Negative)
+
+    //updateGame (Positive)
+
+    //updateGame (Negative)
+
+    //listGames (Positive)
+
+    //listGames (Negative)
+
+    //clearGames (Positive)
+
+}
