@@ -41,7 +41,7 @@ public class Server {
     }
 
     record JoinGameRequest (
-            ChessGame.TeamColor playerColor,
+            String playerColor,
             Integer gameID){
     }
 
@@ -174,9 +174,23 @@ public class Server {
         if (joinGameRequest.playerColor == null || joinGameRequest.gameID == null){
             throw new DataAccessException(400, "Error: bad request");
         }
+        ChessGame.TeamColor color = getTeamColor(joinGameRequest);
 
-        service.joinGame(joinGameRequest.gameID, authToken, joinGameRequest.playerColor);
+        service.joinGame(joinGameRequest.gameID, authToken, color);
         return "";
+    }
+
+    private static ChessGame.TeamColor getTeamColor(JoinGameRequest joinGameRequest) throws DataAccessException {
+        ChessGame.TeamColor color;
+
+        if (joinGameRequest.playerColor.equals("WHITE") || joinGameRequest.playerColor.equals("white") || joinGameRequest.playerColor.equals("White")){
+            color = ChessGame.TeamColor.WHITE;
+        } else if (joinGameRequest.playerColor.equals("BLACK") || joinGameRequest.playerColor.equals("black") || joinGameRequest.playerColor.equals("Black")){
+            color = ChessGame.TeamColor.BLACK;
+        } else {
+            throw new DataAccessException(400, "Error: bad request");
+        }
+        return color;
     }
 
     private Object clearApplication (Request req, Response res) throws DataAccessException {
