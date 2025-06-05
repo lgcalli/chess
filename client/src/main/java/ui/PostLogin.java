@@ -18,7 +18,21 @@ public class PostLogin {
     }
 
     public void run() {
+        System.out.print(this.help());
 
+        var result = "";
+        while (!result.equals("quit")) {
+            System.out.print(help());
+            String line = scanner.nextLine();
+            try {
+                result = eval(line);
+                System.out.print(SET_TEXT_COLOR_BLUE + result);
+            } catch (Throwable e) {
+                var msg = e.toString();
+                System.out.print(msg);
+            }
+        }
+        System.out.println();
     }
 
     private String eval(String input) {

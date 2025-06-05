@@ -29,7 +29,8 @@ public class ServerFacade {
         jsonObject.addProperty("email", email);
         Gson gson = new Gson();
         String jsonString = gson.toJson(jsonObject);
-        this.authToken = this.makeRequest("POST", path, jsonString, null, Object.class).toString();
+        var response = (AuthData) this.makeRequest("POST", path, jsonString, null, Object.class);
+        this.authToken = response.authToken();
     }
 
     public void login (String username, String password) throws ResponseException {
@@ -48,7 +49,7 @@ public class ServerFacade {
     }
 
     public GameData[] listGames () throws ResponseException {
-         var path = "/pet";
+         var path = "/game";
             record listGameResponse(GameData[] gameData) {
             }
         var response = this.makeRequest("GET", path, null, authToken, listGameResponse.class);

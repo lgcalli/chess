@@ -1,3 +1,6 @@
+import chess.ChessGame;
+import ui.ChessClient;
+
 public class Main {
     /*
     public static void main(String[] args) {
@@ -11,6 +14,7 @@ public class Main {
         if (args.length == 1) {
             serverUrl = args[0];
         }
-
+        ChessClient client = new ChessClient(serverUrl);
+        client.run();
     }
 }

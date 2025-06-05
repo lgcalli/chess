@@ -18,21 +18,18 @@ public class PreLogin {
     }
 
     public void run() {
-        System.out.println("\uD83D\uDC36 Welcome to Chess. Sign in to start.");
-        System.out.print(this.help());
-
-
+        System.out.println("Welcome to Chess. Sign in to start.");
+        System.out.print(help());
         var result = "";
         while (!result.equals("quit")) {
-            System.out.print(help());
+            System.out.print("\n" + SET_TEXT_COLOR_WHITE + ">>> " + SET_TEXT_COLOR_GREEN);
             String line = scanner.nextLine();
-
             try {
-                //result = client.eval(line);
-                // System.out.print(BLUE + result);
+                result = eval(line);
+                System.out.print(SET_TEXT_COLOR_WHITE + result);
             } catch (Throwable e) {
                 var msg = e.toString();
-                System.out.print(msg);
+                System.out.print(SET_TEXT_COLOR_RED + msg);
             }
         }
         System.out.println();
@@ -55,20 +52,41 @@ public class PreLogin {
     }
 
     public String register (String... params) throws ResponseException {
-        return "";
+        if (params.length == 3){
+            try {
+                server.register(params[0], params[1], params[2]);
+            } catch (ResponseException e) {
+                return SET_TEXT_COLOR_RED + "\tRegister failed: " + e.getMessage();
+            }
+            PostLogin login = new PostLogin(this.scanner, this.server);
+            login.run();
+            return help();
+        } else {
+            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tExpected: register <USERNAME> <PASSWORD> <EMAIL>");
+        }
     }
 
     public String login (String... params) throws ResponseException {
-        PostLogin login = new PostLogin(this.scanner, this.server);
-        //login.run();
-        return "";
+        if (params.length == 2){
+            try {
+                server.login(params[0], params[1]);
+            } catch (ResponseException e) {
+                return "Login failed: " + e.getMessage();
+            }
+            PostLogin login = new PostLogin(this.scanner, this.server);
+            login.run();
+            return help();
+        } else {
+            throw new ResponseException(400, "Expected: " + SET_TEXT_COLOR_RED + "login <USERNAME> <PASSWORD>");
+        }
     }
 
     private String help () {
-        String output = SET_TEXT_COLOR_BLUE + "\nregister <USERNAME> <PASSWORD> <EMAIL>" + SET_TEXT_COLOR_MAGENTA  + " - to create a new account";
-        output = output + SET_TEXT_COLOR_BLUE + "\nlogin <USERNAME> <PASSWORD>" + SET_TEXT_COLOR_MAGENTA  + " - to login to an existing account";
-        output = output + SET_TEXT_COLOR_BLUE + "\nquit" + SET_TEXT_COLOR_MAGENTA + " - exit application";
-        output = output + SET_TEXT_COLOR_BLUE + "\nhelp" + SET_TEXT_COLOR_MAGENTA + " - output possible commands";
+        String output = "\t" + SET_TEXT_COLOR_WHITE + SET_TEXT_UNDERLINE + SET_TEXT_BOLD + "COMMANDS" + RESET_TEXT_UNDERLINE + RESET_TEXT_BOLD_FAINT;
+        output = output + SET_TEXT_COLOR_BLUE + "\n\tregister <USERNAME> <PASSWORD> <EMAIL>" + SET_TEXT_COLOR_MAGENTA  + " - to create a new account";
+        output = output + SET_TEXT_COLOR_BLUE + "\n\tlogin <USERNAME> <PASSWORD>" + SET_TEXT_COLOR_MAGENTA  + " - to login to an existing account";
+        output = output + SET_TEXT_COLOR_BLUE + "\n\tquit" + SET_TEXT_COLOR_MAGENTA + " - exit application";
+        output = output + SET_TEXT_COLOR_BLUE + "\n\thelp" + SET_TEXT_COLOR_MAGENTA + " - output this list again";
         return output;
     }
 }
