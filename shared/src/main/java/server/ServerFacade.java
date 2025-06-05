@@ -8,11 +8,9 @@ import model.GameData;
 import com.google.gson.JsonObject;
 
 import exception.ResponseException;
-import netscape.javascript.JSObject;
 
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
 
 public class ServerFacade {
 

@@ -2,13 +2,24 @@ package ui;
 
 import static ui.EscapeSequences.*;
 import exception.ResponseException;
+import server.ServerFacade;
 
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class PostLogin {
+    private final Scanner scanner;
+    private final ServerFacade server;
 
+    public PostLogin (Scanner scanner, ServerFacade server){
+        this.scanner = scanner;
+        this.server = server;
 
+    }
 
+    public void run() {
+
+    }
 
     private String eval(String input) {
         try {

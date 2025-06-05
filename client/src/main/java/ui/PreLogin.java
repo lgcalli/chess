@@ -1,18 +1,27 @@
 package ui;
 
 import exception.ResponseException;
+import server.ServerFacade;
+
 import java.util.Arrays;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
 public class PreLogin {
+    private final Scanner scanner;
+    private final ServerFacade server;
 
-    public PreLogin () {
-        System.out.println("\uD83D\uDC36 Welcome to the pet store. Sign in to start.");
-        //System.out.print(client.help());
+    public PreLogin (Scanner scanner, ServerFacade server) {
+        this.scanner = scanner;
+        this.server = server;
+    }
 
-        Scanner scanner = new Scanner(System.in);
+    public void run() {
+        System.out.println("\uD83D\uDC36 Welcome to Chess. Sign in to start.");
+        System.out.print(this.help());
+
+
         var result = "";
         while (!result.equals("quit")) {
             System.out.print(help());
@@ -50,7 +59,7 @@ public class PreLogin {
     }
 
     public String login (String... params) throws ResponseException {
-        PostLogin login = new PostLogin();
+        PostLogin login = new PostLogin(this.scanner, this.server);
         //login.run();
         return "";
     }
