@@ -1,6 +1,3 @@
-import chess.*;
-import ui.Repl;
-
 public class Main {
     /*
     public static void main(String[] args) {
@@ -15,6 +12,5 @@ public class Main {
             serverUrl = args[0];
         }
 
-        new Repl(serverUrl).run();
     }
 }

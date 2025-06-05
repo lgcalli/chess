@@ -9,4 +9,5 @@ public class ChessClient {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
     }
+
 }

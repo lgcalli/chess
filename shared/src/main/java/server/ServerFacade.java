@@ -77,12 +77,15 @@ public class ServerFacade {
         this.makeRequest("PUT", path, jsonString, authToken, Object.class);
     }
 
-    /*
-    public void observeGame () throws ResponseException {
-
-
+    public void observeGame (int gameID) throws ResponseException {
+        var path = "/game";
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("playerColor", "");
+        jsonObject.addProperty("gameID", gameID);
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(jsonObject);
+        this.makeRequest("PUT", path, jsonString, authToken, Object.class);
     }
-    */
 
     private <T> T makeRequest(String method, String path, Object request, String authorization, Class<T> responseClass) throws ResponseException {
         try {
