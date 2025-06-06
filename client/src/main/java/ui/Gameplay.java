@@ -5,16 +5,17 @@ import server.ServerFacade;
 
 import java.util.Scanner;
 
-import static ui.EscapeSequences.SET_TEXT_COLOR_BLUE;
-
 public class Gameplay {
     private final Scanner scanner;
     private final ServerFacade server;
+    private final Integer gameID;
+    private final String color;
 
-    public Gameplay (Scanner scanner, ServerFacade server){
+    public Gameplay (Scanner scanner, ServerFacade server, int gameID, String color){
         this.scanner = scanner;
         this.server = server;
-
+        this.gameID = gameID;
+        this.color = color;
     }
 
     public void run() {

@@ -2,7 +2,6 @@ package ui;
 
 import static ui.EscapeSequences.*;
 
-import com.google.gson.Gson;
 import exception.ResponseException;
 import model.GameData;
 import server.ServerFacade;
@@ -86,11 +85,33 @@ public class PostLogin {
     }
 
     public String joinGame (String... params) throws ResponseException {
-        return "";
+        if (params.length == 2){
+            try {
+                server.joinGame(params[1], Integer.parseInt(params[0]));
+            } catch (ResponseException e) {
+                return SET_TEXT_COLOR_RED + "\tFailed to join game";
+            }
+            Gameplay gameplay = new Gameplay(this.scanner, this.server, Integer.parseInt(params[0]), params[1]);
+            gameplay.run();
+            return help();
+        } else {
+            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tExpected: join <ID> [WHITE/BLACK]");
+        }
     }
 
     public String observeGame (String... params) throws ResponseException {
-        return "";
+        if (params.length == 1){
+            try {
+                server.joinGame(null, Integer.parseInt(params[0]));
+            } catch (ResponseException e) {
+                return SET_TEXT_COLOR_RED + "\tFailed to observe game";
+            }
+            Gameplay gameplay = new Gameplay(this.scanner, this.server, Integer.parseInt(params[0]), null);
+            gameplay.run();
+            return help();
+        } else {
+            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tExpected: join <ID> [WHITE/BLACK]");
+        }
     }
 
     public String logout () throws ResponseException {
