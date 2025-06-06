@@ -56,7 +56,9 @@ public class DataAccessUnitTests {
     @Test
     @DisplayName("CreateAuthTwice")
     public void createAuthTwice () throws DataAccessException {
-
+        String username = "helloThere";
+        authDAO.createAuth(username);
+        Assertions.assertThrows(DataAccessException.class, () -> authDAO.createAuth(username));
     }
 
     //getUser (Positive)

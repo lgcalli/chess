@@ -27,6 +27,9 @@ public class MemoryGameDAO implements GameDAO{
         GameData oldGameData = gamesByGameID.get(gameID);
         String white = oldGameData.whiteUsername();
         String black = oldGameData.blackUsername();
+        if (oldGameData == null) {
+            throw new DataAccessException(400, "Error: game does not exist");
+        }
 
         if (color == ChessGame.TeamColor.WHITE) {
             if (white != null) {

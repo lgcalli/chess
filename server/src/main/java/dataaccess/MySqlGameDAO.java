@@ -36,6 +36,8 @@ public class MySqlGameDAO implements GameDAO {
                     if (rs.next()) {
                         whiteUsername = rs.getString("whiteUsername");
                         blackUsername = rs.getString("blackUsername");
+                    } else {
+                        throw new DataAccessException(400, "Error: game does not exist");
                     }
                 }
             }

@@ -3,6 +3,7 @@ package ui;
 import chess.ChessGame;
 import server.ServerFacade;
 
+import java.util.Objects;
 import java.util.Scanner;
 
 public class Gameplay {
@@ -19,6 +20,8 @@ public class Gameplay {
     }
 
     public void run() {
+
+        System.out.print(this.drawBoard(color));
         /*
         System.out.print(this.help());
 
@@ -38,9 +41,13 @@ public class Gameplay {
         */
     }
 
-    String drawBoard (ChessGame.TeamColor color){
+    String drawBoard (String color){
+        String chessBoard;
+        if (color.equals("WHITE") || color.equals("white") || color.equals("White") || color == null){
 
+        } else if (color.equals("BLACK") || color.equals("black") || color.equals("Black")){
 
+        }
         return "";
     }
 }
