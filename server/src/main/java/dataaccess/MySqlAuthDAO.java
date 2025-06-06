@@ -10,6 +10,9 @@ public class MySqlAuthDAO implements AuthDAO {
     }
 
     public String createAuth(String username) throws DataAccessException {
+        if (username == null || username.isEmpty()) {
+            throw new DataAccessException(400, "Username empty");
+        }
         String authToken = UUID.randomUUID().toString();
         var statement = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
         this.db.executeUpdate(statement, authToken, username);
@@ -17,6 +20,9 @@ public class MySqlAuthDAO implements AuthDAO {
     }
 
     public String getUser(String auth) throws DataAccessException {
+        if (auth == null || auth.isEmpty()) {
+            throw new DataAccessException(400, "Auth empty");
+        }
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT username FROM auth WHERE authToken=?";
             try (var ps = conn.prepareStatement(statement)) {
@@ -34,6 +40,9 @@ public class MySqlAuthDAO implements AuthDAO {
     }
 
     public void deleteAuth(String authToken) throws DataAccessException {
+        if (authToken == null || authToken.isEmpty()) {
+            throw new DataAccessException(400, "Auth empty");
+        }
         var statement = "DELETE FROM auth WHERE authToken=?";
         db.executeUpdate(statement, authToken);
     }

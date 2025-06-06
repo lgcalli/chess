@@ -33,7 +33,7 @@ public class DataAccessUnitTests {
     //createAuth (Positive)
     @Test
     @DisplayName("CreateAuth")
-    public void createAuthTest () throws DataAccessException {
+    public void createAuthPositive () throws DataAccessException {
         String username = "helloThere";
         String authToken = authDAO.createAuth(username);
         try (var conn = DatabaseManager.getConnection()) {
@@ -54,27 +54,40 @@ public class DataAccessUnitTests {
 
     //createAuth (Negative)
     @Test
-    @DisplayName("CreateAuthTwice")
-    public void createAuthTwice () throws DataAccessException {
-        String username = "helloThere";
-        authDAO.createAuth(username);
-        Assertions.assertThrows(DataAccessException.class, () -> authDAO.createAuth(username));
+    public void createAuthNegative () throws DataAccessException {
+        Assertions.assertThrows(DataAccessException.class, () -> authDAO.createAuth(""));
     }
 
     //getUser (Positive)
     @Test
-    @DisplayName("GetUser")
-    public void getUserTest () throws DataAccessException {
-
+    public void getUserPositive () throws DataAccessException {
+        String auth = authDAO.createAuth("username");
+        String user = authDAO.getUser(auth);
+        Assertions.assertEquals("username", user);
     }
 
     //getUser (Negative)
+    @Test
+    public void getUserNegative () throws DataAccessException {
+        Assertions.assertThrows(DataAccessException.class, () -> authDAO.getUser(""));
+    }
 
     //deleteAuth (Positive)
+    @Test
+    public void deleteAuthPositive () throws DataAccessException {
+        String auth = authDAO.createAuth("username");
+        Assertions.assertDoesNotThrow(() -> authDAO.deleteAuth(auth));
+    }
 
     //deleteAuth (Negative)
+    @Test
+    public void deleteAuthNegative () throws DataAccessException {
+        Assertions.assertThrows(DataAccessException.class, () -> authDAO.deleteAuth(""));
+    }
 
     //clearAuth (Positive)
+
+
 
     /*
         USER DAO
