@@ -21,16 +21,15 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public void register (String username, String password, String email) throws ResponseException {
+    public AuthData register (String username, String password, String email) throws ResponseException {
         var path = "/user";
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("username", username);
         jsonObject.addProperty("password", password);
         jsonObject.addProperty("email", email);
-        Gson gson = new Gson();
-        String jsonString = gson.toJson(jsonObject);
-        var response = (AuthData) this.makeRequest("POST", path, jsonString, null, Object.class);
+        var response =  this.makeRequest("POST", path, jsonObject, null, AuthData.class);
         this.authToken = response.authToken();
+        return response;
     }
 
     public void login (String username, String password) throws ResponseException {
@@ -38,9 +37,7 @@ public class ServerFacade {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("username", username);
         jsonObject.addProperty("password", password);
-        Gson gson = new Gson();
-        String jsonString = gson.toJson(jsonObject);
-        this.authToken = this.makeRequest("POST", path, jsonString, null, Object.class).toString();
+        this.authToken = this.makeRequest("POST", path, jsonObject, null, Object.class).toString();
     }
 
     public void logout () throws ResponseException {
@@ -60,20 +57,16 @@ public class ServerFacade {
         var path = "/game";
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("gameName", gameName);
-        Gson gson = new Gson();
-        String jsonString = gson.toJson(jsonObject);
-        this.makeRequest("POST", path, jsonString, authToken, Object.class);
+        this.makeRequest("POST", path, jsonObject, authToken, Object.class);
     }
 
 
-    public void playGame (String playerColor, int gameID) throws ResponseException {
+    public void joinGame (String playerColor, int gameID) throws ResponseException {
         var path = "/game";
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("playerColor", playerColor);
         jsonObject.addProperty("gameID", gameID);
-        Gson gson = new Gson();
-        String jsonString = gson.toJson(jsonObject);
-        this.makeRequest("PUT", path, jsonString, authToken, Object.class);
+        this.makeRequest("PUT", path, jsonObject, authToken, Object.class);
     }
 
     public void observeGame (int gameID) throws ResponseException {
@@ -81,9 +74,12 @@ public class ServerFacade {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("playerColor", "");
         jsonObject.addProperty("gameID", gameID);
-        Gson gson = new Gson();
-        String jsonString = gson.toJson(jsonObject);
-        this.makeRequest("PUT", path, jsonString, authToken, Object.class);
+        this.makeRequest("PUT", path, jsonObject, authToken, Object.class);
+    }
+
+    public void clearApplication () throws ResponseException {
+        var path = "/db";
+        this.makeRequest("DELETE", path, null, null, Object.class);
     }
 
     private <T> T makeRequest(String method, String path, Object request, String authorization, Class<T> responseClass) throws ResponseException {

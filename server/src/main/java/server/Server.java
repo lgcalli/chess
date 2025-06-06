@@ -2,6 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.*;
+import model.AuthData;
 import model.UserData;
 import model.GameData;
 
@@ -120,8 +121,8 @@ public class Server {
         }
         UserData userData = new UserData (user.username, user.password, user.email);
         String authToken = service.register(userData);
-        RegisterResponse registerResponse = new RegisterResponse(user.username, authToken);
-        return new Gson().toJson(registerResponse);
+        AuthData authData = new AuthData(authToken, user.username);
+        return new Gson().toJson(authData);
     }
 
     private Object login(Request req, Response res) throws DataAccessException {
@@ -130,8 +131,8 @@ public class Server {
             throw new DataAccessException(400, "Error: bad request");
         }
         String authToken = service.login(loginRequest.username, loginRequest.password);
-        LoginResponse loginResponse = new LoginResponse(authToken, loginRequest.username);
-        return new Gson().toJson(loginResponse);
+        AuthData authData = new AuthData(authToken, loginRequest.username);
+        return new Gson().toJson(authData);
     }
 
     private Object logout (Request req, Response res) throws DataAccessException {
