@@ -1,7 +1,10 @@
 package ui;
 
 import static ui.EscapeSequences.*;
+
+import com.google.gson.Gson;
 import exception.ResponseException;
+import model.GameData;
 import server.ServerFacade;
 
 import java.util.Arrays;
@@ -10,29 +13,30 @@ import java.util.Scanner;
 public class PostLogin {
     private final Scanner scanner;
     private final ServerFacade server;
+    private final String username;
 
-    public PostLogin (Scanner scanner, ServerFacade server){
+    public PostLogin (Scanner scanner, ServerFacade server, String username){
         this.scanner = scanner;
         this.server = server;
-
+        this.username = username;
     }
 
     public void run() {
-        System.out.print(this.help());
+        System.out.println(SET_TEXT_COLOR_YELLOW + "Welcome " + username + "!");
+        System.out.print(help());
 
         var result = "";
-        while (!result.equals("quit")) {
-            System.out.print(help());
+        while (!result.equals("logout")) {
+            System.out.print("\n" + SET_TEXT_COLOR_WHITE + ">>> " + SET_TEXT_COLOR_GREEN);
             String line = scanner.nextLine();
             try {
                 result = eval(line);
-                System.out.print(SET_TEXT_COLOR_BLUE + result);
+                System.out.print(RESET_TEXT_COLOR + result);
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
             }
         }
-        System.out.println();
     }
 
     private String eval(String input) {
@@ -42,11 +46,10 @@ public class PostLogin {
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "create" -> createGame(params);
-                case "list" -> listGames(params);
+                case "list" -> listGames();
                 case "join" -> joinGame(params);
                 case "observe" -> observeGame(params);
-                case "logout" -> logout(params);
-                case "quit" -> "quit";
+                case "logout" -> logout();
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -55,11 +58,31 @@ public class PostLogin {
     }
 
     public String createGame (String... params) throws ResponseException {
-        return "";
+        if (params.length == 1){
+            try {
+                server.createNewGame(params[0]);
+            } catch (ResponseException e) {
+                return SET_TEXT_COLOR_RED + "\tFailed to create game";
+            }
+            return "Game created";
+        } else {
+            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tExpected: create <NAME>");
+        }
     }
 
-    public String listGames (String... params) throws ResponseException {
-        return "";
+    public String listGames () throws ResponseException {
+        String output = String.format("%-5s %-20s %-20s %-20s\n", "ID", "NAME", "WHITE USER", "BLACK USER");
+        GameData[] games = server.listGames();
+        for (GameData game:games){
+            output = output + String.format(
+                    "%-5d %-20s %-20s %-20s\n",
+                    game.gameID(),
+                    game.gameName(),
+                    game.whiteUsername() != null ? game.whiteUsername() : "-",
+                    game.blackUsername() != null ? game.blackUsername() : "-"
+            );
+        }
+        return output;
     }
 
     public String joinGame (String... params) throws ResponseException {
@@ -70,17 +93,23 @@ public class PostLogin {
         return "";
     }
 
-    public String logout (String... params) throws ResponseException {
-        return "";
+    public String logout () throws ResponseException {
+        try {
+            server.logout();
+        } catch (ResponseException e) {
+            return SET_TEXT_COLOR_RED + "\tFailed to logout";
+        }
+        return "logout";
     }
 
     private String help () {
-        String output = SET_TEXT_COLOR_BLUE + "\ncreate <NAME>" + SET_TEXT_COLOR_MAGENTA + " - creates a game";
-        output = output + SET_TEXT_COLOR_BLUE + "\nlist" + SET_TEXT_COLOR_MAGENTA + " - lists games";
-        output = output + SET_TEXT_COLOR_BLUE + "\njoin <ID> [WHITE/BLACK]" + SET_TEXT_COLOR_MAGENTA + " - join game";
-        output = output + SET_TEXT_COLOR_BLUE + "\nobserve <ID>" + SET_TEXT_COLOR_MAGENTA + " - observe game";
-        output = output + SET_TEXT_COLOR_BLUE + "\nlogout" + SET_TEXT_COLOR_MAGENTA + " - logout user";
-        output = output + SET_TEXT_COLOR_BLUE + "\nhelp" + SET_TEXT_COLOR_MAGENTA + " - output possible commands";
+        String output = "\n\t" + SET_TEXT_COLOR_WHITE + SET_TEXT_UNDERLINE + SET_TEXT_BOLD + "COMMANDS" + RESET_TEXT_UNDERLINE + RESET_TEXT_BOLD_FAINT;
+        output = output + SET_TEXT_COLOR_BLUE + "\n\tcreate <NAME>" + SET_TEXT_COLOR_MAGENTA + " - creates a game";
+        output = output + SET_TEXT_COLOR_BLUE + "\n\tlist" + SET_TEXT_COLOR_MAGENTA + " - lists games";
+        output = output + SET_TEXT_COLOR_BLUE + "\n\tjoin <ID> [WHITE/BLACK]" + SET_TEXT_COLOR_MAGENTA + " - join game";
+        output = output + SET_TEXT_COLOR_BLUE + "\n\tobserve <ID>" + SET_TEXT_COLOR_MAGENTA + " - observe game";
+        output = output + SET_TEXT_COLOR_BLUE + "\n\tlogout" + SET_TEXT_COLOR_MAGENTA + " - logout user";
+        output = output + SET_TEXT_COLOR_BLUE + "\n\thelp" + SET_TEXT_COLOR_MAGENTA + " - output possible commands" + RESET_TEXT_COLOR;
         return output;
     }
 

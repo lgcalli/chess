@@ -11,6 +11,7 @@ import exception.ResponseException;
 
 import java.io.*;
 import java.net.*;
+import java.util.Collection;
 
 public class ServerFacade {
 
@@ -32,25 +33,27 @@ public class ServerFacade {
         return response;
     }
 
-    public void login (String username, String password) throws ResponseException {
+    public AuthData login (String username, String password) throws ResponseException {
         var path = "/session";
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("username", username);
         jsonObject.addProperty("password", password);
-        this.authToken = this.makeRequest("POST", path, jsonObject, null, Object.class).toString();
+        var response = this.makeRequest("POST", path, jsonObject, null, AuthData.class);
+        this.authToken = response.authToken();
+        return response;
     }
 
     public void logout () throws ResponseException {
         var path = "/session";
-        this.makeRequest("DELETE", path, null, authToken, Object.class);
+        this.makeRequest("DELETE", path, null, this.authToken, Object.class);
+        this.authToken = null;
     }
 
     public GameData[] listGames () throws ResponseException {
-         var path = "/game";
-            record listGameResponse(GameData[] gameData) {
-            }
+        var path = "/game";
+        record listGameResponse(Collection<GameData> games) { }
         var response = this.makeRequest("GET", path, null, authToken, listGameResponse.class);
-        return response.gameData();
+        return response.games().toArray(new GameData[0]);
     }
 
     public void createNewGame (String gameName) throws ResponseException {
@@ -72,7 +75,7 @@ public class ServerFacade {
     public void observeGame (int gameID) throws ResponseException {
         var path = "/game";
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("playerColor", "");
+        jsonObject.addProperty("playerColor", "OBSERVE");
         jsonObject.addProperty("gameID", gameID);
         this.makeRequest("PUT", path, jsonObject, authToken, Object.class);
     }
