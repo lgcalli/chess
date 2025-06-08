@@ -31,7 +31,6 @@ public class PostLogin {
                 System.out.print(RESET_TEXT_COLOR + result);
             } catch (Throwable e) {
                 var msg = e.toString();
-                System.out.print(msg);
             }
         }
     }
