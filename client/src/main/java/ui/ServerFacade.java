@@ -72,7 +72,7 @@ public class ServerFacade {
     public void observeGame (int gameID) throws ResponseException {
         var path = "/game";
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("playerColor", "OBSERVE");
+        jsonObject.addProperty("playerColor", "observe");
         jsonObject.addProperty("gameID", gameID);
         this.makeRequest("PUT", path, jsonObject, authToken, Object.class);
     }

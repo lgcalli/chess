@@ -112,7 +112,7 @@ public class ServerFacadeTests {
     @Test
     void observeGamePositive() throws Exception {
         facade.register("player1", "password", "p1@email.com");
-        facade.createNewGame("gameName");
+        facade.createNewGame("AnotherGame");
         Assertions.assertDoesNotThrow(() -> facade.observeGame(1));
     }
 

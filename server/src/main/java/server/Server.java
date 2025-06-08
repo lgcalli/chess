@@ -187,7 +187,7 @@ public class Server {
             color = ChessGame.TeamColor.WHITE;
         } else if ("black".equalsIgnoreCase(joinGameRequest.playerColor)) {
             color = ChessGame.TeamColor.BLACK;
-        } else if (joinGameRequest.playerColor.equals("observe")){
+        } else if ("observe".equalsIgnoreCase(joinGameRequest.playerColor)){
             color = null;
         } else {
             throw new DataAccessException(400, "Error: bad request");
