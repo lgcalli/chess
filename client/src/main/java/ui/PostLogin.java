@@ -122,7 +122,8 @@ public class PostLogin {
     }
 
     private String help () {
-        String output = "\n\t" + SET_TEXT_COLOR_WHITE + SET_TEXT_UNDERLINE + SET_TEXT_BOLD + "COMMANDS" + RESET_TEXT_UNDERLINE + RESET_TEXT_BOLD_FAINT;
+        String output = "\n\t" + SET_TEXT_COLOR_WHITE + SET_TEXT_UNDERLINE;
+        output = output + SET_TEXT_BOLD + "COMMANDS" + RESET_TEXT_UNDERLINE + RESET_TEXT_BOLD_FAINT;
         output = output + SET_TEXT_COLOR_BLUE + "\n\tcreate <NAME>" + SET_TEXT_COLOR_MAGENTA + " - creates a game";
         output = output + SET_TEXT_COLOR_BLUE + "\n\tlist" + SET_TEXT_COLOR_MAGENTA + " - lists games";
         output = output + SET_TEXT_COLOR_BLUE + "\n\tjoin <ID> [WHITE/BLACK]" + SET_TEXT_COLOR_MAGENTA + " - join game";
