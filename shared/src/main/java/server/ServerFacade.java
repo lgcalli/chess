@@ -63,7 +63,6 @@ public class ServerFacade {
         this.makeRequest("POST", path, jsonObject, authToken, Object.class);
     }
 
-
     public void joinGame (String playerColor, int gameID) throws ResponseException {
         var path = "/game";
         JsonObject jsonObject = new JsonObject();
