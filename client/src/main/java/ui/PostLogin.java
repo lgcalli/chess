@@ -99,12 +99,7 @@ public class PostLogin {
 
     public String observeGame (String... params) throws ResponseException {
         if (params.length == 1){
-            try {
-                server.joinGame(null, Integer.parseInt(params[0]));
-            } catch (ResponseException e) {
-                return SET_TEXT_COLOR_RED + "\tFailed to observe game";
-            }
-            Gameplay gameplay = new Gameplay(this.scanner, this.server, Integer.parseInt(params[0]), null);
+            Gameplay gameplay = new Gameplay(this.scanner, this.server, Integer.parseInt(params[0]), "observe");
             gameplay.run();
             return help();
         } else {

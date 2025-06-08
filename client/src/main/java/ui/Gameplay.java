@@ -35,14 +35,14 @@ public class Gameplay {
 
     String drawBoard (String color){
         String chessBoard = "";
-        if (color.equals("BLACK") || color.equals("black") || color.equals("Black") || color == null){
+        if (color.equals("black")){
             for (int i = 1; i <= 8; i++){
                 for (int j = 1; j <= 8; j++){
                     chessBoard = getString(chessBoard, i, j);
                 }
                 chessBoard = chessBoard +  RESET_BG_COLOR + "\n";
             }
-        } else if (color.equals("WHITE") || color.equals("white") || color.equals("White")){
+        } else if (color.equals("white") || color.equals("observe")){
             for (int i = 8; i >= 1; i--){
                 for (int j = 8; j >= 1; j--){
                     chessBoard = getString(chessBoard, i, j);

@@ -67,7 +67,6 @@ public class Service {
         } else {
             gameDataAccess.updateGame(gameID, username, clientColor);
         }
-        //ADD METHOD FOR OBSERVING GAME
     }
 
     public void clearApplication () throws DataAccessException {
