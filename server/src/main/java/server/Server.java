@@ -184,9 +184,9 @@ public class Server {
     private static ChessGame.TeamColor getTeamColor(JoinGameRequest joinGameRequest) throws DataAccessException {
         ChessGame.TeamColor color;
 
-        if (joinGameRequest.playerColor.equals("WHITE") || joinGameRequest.playerColor.equals("white") || joinGameRequest.playerColor.equals("White")){
+        if (joinGameRequest.playerColor.equals("WHITE")){
             color = ChessGame.TeamColor.WHITE;
-        } else if (joinGameRequest.playerColor.equals("BLACK") || joinGameRequest.playerColor.equals("black") || joinGameRequest.playerColor.equals("Black")){
+        } else if (joinGameRequest.playerColor.equals("BLACK")){
             color = ChessGame.TeamColor.BLACK;
         } else if (joinGameRequest.playerColor.equals("OBSERVE")){
             color = null;

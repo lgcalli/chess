@@ -1,7 +1,5 @@
 package ui;
-import server.ServerFacade;
 
-import static ui.EscapeSequences.*;
 import java.util.Scanner;
 
 public class ChessClient {

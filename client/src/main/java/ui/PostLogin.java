@@ -1,10 +1,8 @@
 package ui;
 
 import static ui.EscapeSequences.*;
-
 import exception.ResponseException;
 import model.GameData;
-import server.ServerFacade;
 
 import java.util.Arrays;
 import java.util.Scanner;

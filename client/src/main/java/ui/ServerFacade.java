@@ -1,9 +1,7 @@
-package server;
+package ui;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
-import model.UserData;
 import model.GameData;
 import com.google.gson.JsonObject;
 
@@ -51,8 +49,8 @@ public class ServerFacade {
 
     public GameData[] listGames () throws ResponseException {
         var path = "/game";
-        record listGameResponse(Collection<GameData> games) { }
-        var response = this.makeRequest("GET", path, null, authToken, listGameResponse.class);
+        record ListGameResponse(Collection<GameData> games) { }
+        var response = this.makeRequest("GET", path, null, authToken, ListGameResponse.class);
         return response.games().toArray(new GameData[0]);
     }
 

@@ -3,11 +3,7 @@ package ui;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
-import server.ServerFacade;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
@@ -35,24 +31,6 @@ public class Gameplay {
             System.out.print(this.drawBoard(color));
         }
 
-
-        /*
-        System.out.print(this.help());
-
-        var result = "";
-        while (!result.equals("quit")) {
-            System.out.print(help());
-            String line = scanner.nextLine();
-            try {
-                result = eval(line);
-                System.out.print(SET_TEXT_COLOR_BLUE + result);
-            } catch (Throwable e) {
-                var msg = e.toString();
-                System.out.print(msg);
-            }
-        }
-        System.out.println();
-        */
     }
 
     String drawBoard (String color){
@@ -60,38 +38,14 @@ public class Gameplay {
         if (color.equals("BLACK") || color.equals("black") || color.equals("Black") || color == null){
             for (int i = 1; i <= 8; i++){
                 for (int j = 1; j <= 8; j++){
-                    if (i % 2 == 0 && j % 2 == 0 || i % 2 == 1 && j % 2 == 1){
-                        chessBoard = chessBoard + SET_BG_COLOR_WHITE;
-                    } else {
-                        chessBoard = chessBoard + SET_BG_COLOR_BLACK;
-                    }
-                    ChessPiece piece = game.getBoard().getPiece(new ChessPosition(i, j));
-                    if (piece == null){
-                        chessBoard = chessBoard + "   ";
-                    } else if (piece.getTeamColor() == ChessGame.TeamColor.WHITE){
-                        chessBoard = chessBoard + this.getPieceTypeWhite(piece);
-                    } else {
-                        chessBoard = chessBoard + this.getPieceTypeBlack(piece);
-                    }
+                    chessBoard = getString(chessBoard, i, j);
                 }
                 chessBoard = chessBoard +  RESET_BG_COLOR + "\n";
             }
         } else if (color.equals("WHITE") || color.equals("white") || color.equals("White")){
             for (int i = 8; i >= 1; i--){
                 for (int j = 8; j >= 1; j--){
-                    if (i % 2 == 0 && j % 2 == 0 || i % 2 == 1 && j % 2 == 1){
-                        chessBoard = chessBoard + SET_BG_COLOR_WHITE;
-                    } else {
-                        chessBoard = chessBoard + SET_BG_COLOR_BLACK;
-                    }
-                    ChessPiece piece = game.getBoard().getPiece(new ChessPosition(i, j));
-                    if (piece == null){
-                        chessBoard = chessBoard + "   ";
-                    } else if (piece.getTeamColor() == ChessGame.TeamColor.WHITE){
-                        chessBoard = chessBoard + this.getPieceTypeWhite(piece);
-                    } else {
-                        chessBoard = chessBoard + this.getPieceTypeBlack(piece);
-                    }
+                    chessBoard = getString(chessBoard, i, j);
                 }
                 chessBoard = chessBoard + RESET_BG_COLOR + "\n";
             }
@@ -99,26 +53,39 @@ public class Gameplay {
         return chessBoard;
     }
 
+    private String getString(String chessBoard, int i, int j) {
+        if (i % 2 == 0 && j % 2 == 0 || i % 2 == 1 && j % 2 == 1){
+            chessBoard = chessBoard + SET_BG_COLOR_WHITE;
+        } else {
+            chessBoard = chessBoard + SET_BG_COLOR_BLACK;
+        }
+        ChessPiece piece = game.getBoard().getPiece(new ChessPosition(i, j));
+        if (piece == null){
+            chessBoard = chessBoard + "   ";
+        } else if (piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+            chessBoard = chessBoard + this.getPieceTypeWhite(piece);
+        } else {
+            chessBoard = chessBoard + this.getPieceTypeBlack(piece);
+        }
+        return chessBoard;
+    }
+
     String getPieceTypeWhite (ChessPiece piece){
-        return switch (piece.getPieceType()) {
-            case ChessPiece.PieceType.KING -> WHITE_KING;
-            case ChessPiece.PieceType.QUEEN -> WHITE_QUEEN;
-            case ChessPiece.PieceType.BISHOP -> WHITE_BISHOP;
-            case ChessPiece.PieceType.KNIGHT -> WHITE_KNIGHT;
-            case ChessPiece.PieceType.ROOK -> WHITE_ROOK;
-            case ChessPiece.PieceType.PAWN -> WHITE_PAWN;
-            default -> null;
-        };
+        return getPiece(piece, WHITE_KING, WHITE_QUEEN, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK, WHITE_PAWN);
     }
 
     String getPieceTypeBlack (ChessPiece piece){
+        return getPiece(piece, BLACK_KING, BLACK_QUEEN, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK, BLACK_PAWN);
+    }
+
+    private String getPiece(ChessPiece piece, String king, String queen, String bishop, String knight, String rook, String pawn) {
         return switch (piece.getPieceType()) {
-            case ChessPiece.PieceType.KING -> BLACK_KING;
-            case ChessPiece.PieceType.QUEEN -> BLACK_QUEEN;
-            case ChessPiece.PieceType.BISHOP -> BLACK_BISHOP;
-            case ChessPiece.PieceType.KNIGHT -> BLACK_KNIGHT;
-            case ChessPiece.PieceType.ROOK -> BLACK_ROOK;
-            case ChessPiece.PieceType.PAWN -> BLACK_PAWN;
+            case ChessPiece.PieceType.KING -> king;
+            case ChessPiece.PieceType.QUEEN -> queen;
+            case ChessPiece.PieceType.BISHOP -> bishop;
+            case ChessPiece.PieceType.KNIGHT -> knight;
+            case ChessPiece.PieceType.ROOK -> rook;
+            case ChessPiece.PieceType.PAWN -> pawn;
             default -> null;
         };
     }

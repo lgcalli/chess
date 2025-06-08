@@ -12,7 +12,7 @@ import service.Service;
 import java.sql.SQLException;
 
 public class DataAccessUnitTests {
-    private static final UserData user = new UserData("ExistingUser", "existingUserPassword", "eu@mail.com");
+    private static final UserData USER = new UserData("ExistingUser", "existingUserPassword", "eu@mail.com");
     private AuthDAO authDAO;
     private UserDAO userDAO;
     private GameDAO gameDAO;
