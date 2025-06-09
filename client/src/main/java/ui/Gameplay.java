@@ -3,7 +3,9 @@ package ui;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import exception.ResponseException;
 
+import java.util.Arrays;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
@@ -23,18 +25,71 @@ public class Gameplay {
     }
 
     public void run() {
-
+        System.out.print(help());
         System.out.print(this.drawBoard(color));
         var result = "";
-        while (!result.equals("quit")){
+        while (!result.equals("leave")){
+            System.out.print("\n" + SET_TEXT_COLOR_WHITE + ">>> " + SET_TEXT_COLOR_GREEN);
             String line = scanner.nextLine();
-            System.out.print(this.drawBoard(color));
+            try {
+                result = eval(line);
+                System.out.print(RESET_TEXT_COLOR + result);
+            } catch (Throwable e) {
+                var msg = e.toString();
+                System.out.print(SET_TEXT_COLOR_RED + msg);
+            }
         }
 
     }
 
+    private String eval(String input) {
+        try {
+            var tokens = input.toLowerCase().split(" ");
+            var cmd = (tokens.length > 0) ? tokens[0] : "help";
+            var params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                case "redraw chess board" -> drawBoard(color);
+                case "make move" -> makeMove(params);
+                case "resign" -> resign();
+                case "highlight legal moves" -> highlightLegalMoves(params);
+                case "leave" -> "leave";
+                default -> help();
+            };
+        } catch (ResponseException ex) {
+            return ex.getMessage();
+        }
+    }
+
+    String highlightLegalMoves (String... params) throws ResponseException {
+        String output = "";
+
+        return output;
+    }
+
+    String makeMove (String... params) throws ResponseException {
+        String output = "";
+
+        return output;
+    }
+
+    String resign () throws ResponseException {
+        String output = "";
+
+        return output;
+    }
+
+    String help () {
+        String output = "\n\t" + SET_TEXT_COLOR_WHITE + SET_TEXT_UNDERLINE + SET_TEXT_BOLD;
+        output = output + "COMMANDS" + RESET_TEXT_UNDERLINE + RESET_TEXT_BOLD_FAINT;
+        output = output + SET_TEXT_COLOR_BLUE + "\n\thighlight legal moves <position>";
+        output = output + SET_TEXT_COLOR_BLUE + "\n\tmakeMove <position 1> <position 2>" + SET_TEXT_COLOR_MAGENTA  + " - to login to an existing account";
+        output = output + SET_TEXT_COLOR_BLUE + "\n\tleave" + SET_TEXT_COLOR_MAGENTA + " - leave game";
+        output = output + SET_TEXT_COLOR_BLUE + "\n\thelp" + SET_TEXT_COLOR_MAGENTA + " - output this list again" + RESET_TEXT_COLOR;
+        return output;
+    }
+
     String drawBoard (String color){
-        String chessBoard = "";
+        String chessBoard = "\n";
         if (color.equals("black")){
             for (int i = 1; i <= 8; i++){
                 for (int j = 1; j <= 8; j++){
@@ -71,11 +126,11 @@ public class Gameplay {
     }
 
     String getPieceTypeWhite (ChessPiece piece){
-        return getPiece(piece, WHITE_KING, WHITE_QUEEN, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK, WHITE_PAWN);
+        return SET_TEXT_COLOR_BLUE + getPiece(piece, WHITE_KING, WHITE_QUEEN, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK, WHITE_PAWN);
     }
 
     String getPieceTypeBlack (ChessPiece piece){
-        return getPiece(piece, BLACK_KING, BLACK_QUEEN, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK, BLACK_PAWN);
+        return SET_TEXT_COLOR_RED +  getPiece(piece, BLACK_KING, BLACK_QUEEN, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK, BLACK_PAWN);
     }
 
     private String getPiece(ChessPiece piece, String king, String queen, String bishop, String knight, String rook, String pawn) {
