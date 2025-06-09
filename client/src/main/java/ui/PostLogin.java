@@ -4,15 +4,15 @@ import static ui.EscapeSequences.*;
 import exception.ResponseException;
 import model.GameData;
 
-import java.util.Arrays;
-import java.util.Scanner;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class PostLogin {
     private final Scanner scanner;
     private final ServerFacade server;
     private final String username;
 
-    public PostLogin (Scanner scanner, ServerFacade server, String username){
+    public PostLogin(Scanner scanner, ServerFacade server, String username) {
         this.scanner = scanner;
         this.server = server;
         this.username = username;
@@ -31,6 +31,7 @@ public class PostLogin {
                 System.out.print(RESET_TEXT_COLOR + result);
             } catch (Throwable e) {
                 var msg = e.toString();
+                System.out.print(SET_TEXT_COLOR_RED + msg);
             }
         }
     }
@@ -53,8 +54,8 @@ public class PostLogin {
         }
     }
 
-    public String createGame (String... params) throws ResponseException {
-        if (params.length == 1){
+    public String createGame(String... params) throws ResponseException {
+        if (params.length == 1) {
             try {
                 server.createNewGame(params[0]);
             } catch (ResponseException e) {
@@ -66,10 +67,10 @@ public class PostLogin {
         }
     }
 
-    public String listGames () throws ResponseException {
+    public String listGames() throws ResponseException {
         String output = String.format("%-5s %-20s %-20s %-20s\n", "ID", "NAME", "WHITE USER", "BLACK USER");
         GameData[] games = server.listGames();
-        for (GameData game:games){
+        for (GameData game : games) {
             output = output + String.format(
                     "%-5d %-20s %-20s %-20s\n",
                     game.gameID(),
@@ -81,8 +82,8 @@ public class PostLogin {
         return output;
     }
 
-    public String joinGame (String... params) throws ResponseException {
-        if (params.length == 2){
+    public String joinGame(String... params) throws ResponseException {
+        if (params.length == 2) {
             try {
                 server.joinGame(params[1], Integer.parseInt(params[0]));
             } catch (ResponseException e) {
@@ -96,17 +97,31 @@ public class PostLogin {
         }
     }
 
-    public String observeGame (String... params) throws ResponseException {
-        if (params.length == 1){
+    public String observeGame(String... params) throws ResponseException {
+        GameData[] games = server.listGames();
+        ArrayList <Integer> gameIDs = new ArrayList<>();
+        for (GameData game:games){
+            gameIDs.add(game.gameID());
+        }
+        if (params.length != 1) {
+            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tExpected: join <ID> [WHITE/BLACK]");
+        } else {
+            int gameId;
+            try {
+                gameId = Integer.parseInt(params[0]);
+            } catch (NumberFormatException e) {
+                throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tInvalid game ID");
+            }
+            if (!gameIDs.contains(gameId)){
+                throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tInvalid game ID");
+            }
             Gameplay gameplay = new Gameplay(this.scanner, this.server, Integer.parseInt(params[0]), "observe");
             gameplay.run();
             return help();
-        } else {
-            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tExpected: join <ID> [WHITE/BLACK]");
         }
     }
 
-    public String logout () throws ResponseException {
+    public String logout() throws ResponseException {
         try {
             server.logout();
         } catch (ResponseException e) {
@@ -115,7 +130,7 @@ public class PostLogin {
         return "logout";
     }
 
-    private String help () {
+    private String help() {
         String output = "\n\t" + SET_TEXT_COLOR_WHITE + SET_TEXT_UNDERLINE;
         output = output + SET_TEXT_BOLD + "COMMANDS" + RESET_TEXT_UNDERLINE + RESET_TEXT_BOLD_FAINT;
         output = output + SET_TEXT_COLOR_BLUE + "\n\tcreate <NAME>" + SET_TEXT_COLOR_MAGENTA + " - creates a game";
@@ -126,8 +141,5 @@ public class PostLogin {
         output = output + SET_TEXT_COLOR_BLUE + "\n\thelp" + SET_TEXT_COLOR_MAGENTA + " - output possible commands" + RESET_TEXT_COLOR;
         return output;
     }
-
-
-
 
 }

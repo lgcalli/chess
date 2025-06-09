@@ -69,7 +69,7 @@ public class PreLogin {
             try {
                 server.login(params[0], params[1]);
             } catch (ResponseException e) {
-                return "\tLogin failed";
+                return SET_TEXT_COLOR_RED + "\tLogin failed";
             }
             PostLogin login = new PostLogin(this.scanner, this.server, params[0]);
             login.run();

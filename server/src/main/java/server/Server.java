@@ -176,7 +176,6 @@ public class Server {
             throw new DataAccessException(400, "Error: bad request");
         }
         ChessGame.TeamColor color = getTeamColor(joinGameRequest);
-
         service.joinGame(joinGameRequest.gameID, authToken, color);
         return "";
     }
