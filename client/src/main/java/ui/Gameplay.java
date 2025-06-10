@@ -74,6 +74,9 @@ public class Gameplay {
 
     String resign () throws ResponseException {
         String output = "";
+        System.out.print(RESET_TEXT_COLOR + "Are you sure you want to resign? (Y/N)");
+        String line = scanner.nextLine();
+
 
         return output;
     }
