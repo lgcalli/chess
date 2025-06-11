@@ -3,6 +3,6 @@ import websocket.messages.*;
 import websocket.commands.*;
 
 public interface NotificationHandler {
-   void notify(NotificationMessage notification);
+    void notify(ServerMessage notification);
 }
 

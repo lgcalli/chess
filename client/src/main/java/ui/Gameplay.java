@@ -3,20 +3,23 @@ package ui;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import client_web_socket.*;
 import exception.ResponseException;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
-public class Gameplay {
+public class Gameplay implements NotificationHandler {
     private final Scanner scanner;
     private final ServerFacade server;
     private final Integer gameID;
     private final String color;
     private ChessGame game;
 
-    public Gameplay (Scanner scanner, ServerFacade server, int gameID, String color) {
+    public Gameplay (Scanner scanner, ServerFacade server, String serverUrl, int gameID, String color) {
         this.scanner = scanner;
         this.server = server;
         this.gameID = gameID;
@@ -29,7 +32,7 @@ public class Gameplay {
         System.out.print(this.drawBoard(color));
         var result = "";
         while (!result.equals("leave")){
-            System.out.print("\n" + SET_TEXT_COLOR_WHITE + ">>> " + SET_TEXT_COLOR_GREEN);
+            printPrompt();
             String line = scanner.nextLine();
             try {
                 result = eval(line);
@@ -146,5 +149,15 @@ public class Gameplay {
             case ChessPiece.PieceType.PAWN -> pawn;
             default -> null;
         };
+    }
+
+    private void printPrompt() {
+        System.out.print("\n" + SET_TEXT_COLOR_WHITE + ">>> " + SET_TEXT_COLOR_GREEN);
+    }
+
+    @Override
+    public void notify(ServerMessage notification) {
+        System.out.println(SET_TEXT_COLOR_RED + notification);
+        printPrompt();
     }
 }

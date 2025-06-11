@@ -1,6 +1,9 @@
 package ui;
 
 import static ui.EscapeSequences.*;
+
+import client_web_socket.NotificationHandler;
+import client_web_socket.WebSocketFacade;
 import exception.ResponseException;
 import model.GameData;
 
@@ -10,11 +13,14 @@ import java.util.*;
 public class PostLogin {
     private final Scanner scanner;
     private final ServerFacade server;
+    private final String serverUrl;
     private final String username;
 
-    public PostLogin(Scanner scanner, ServerFacade server, String username) {
+
+    public PostLogin(Scanner scanner, ServerFacade server, String serverUrl, String username) {
         this.scanner = scanner;
         this.server = server;
+        this.serverUrl = serverUrl;
         this.username = username;
     }
 
@@ -89,7 +95,7 @@ public class PostLogin {
             } catch (ResponseException e) {
                 return SET_TEXT_COLOR_RED + "\tFailed to join game";
             }
-            Gameplay gameplay = new Gameplay(this.scanner, this.server, Integer.parseInt(params[0]), params[1]);
+            Gameplay gameplay = new Gameplay(this.scanner, this.server, this.serverUrl, Integer.parseInt(params[0]), params[1]);
             gameplay.run();
             return help();
         } else {
@@ -115,7 +121,7 @@ public class PostLogin {
             if (!gameIDs.contains(gameId)){
                 throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tInvalid game ID");
             }
-            Gameplay gameplay = new Gameplay(this.scanner, this.server, Integer.parseInt(params[0]), "observe");
+            Gameplay gameplay = new Gameplay(this.scanner, this.server, this.serverUrl, Integer.parseInt(params[0]), "observe");
             gameplay.run();
             return help();
         }

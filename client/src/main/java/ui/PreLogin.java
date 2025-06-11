@@ -10,10 +10,12 @@ import static ui.EscapeSequences.*;
 public class PreLogin {
     private final Scanner scanner;
     private final ServerFacade server;
+    private final String serverUrl;
 
-    public PreLogin (Scanner scanner, ServerFacade server) {
+    public PreLogin (Scanner scanner, ServerFacade server, String serverUrl) {
         this.scanner = scanner;
         this.server = server;
+        this.serverUrl = serverUrl;
     }
 
     public void run() {
@@ -56,7 +58,7 @@ public class PreLogin {
             } catch (ResponseException e) {
                 return SET_TEXT_COLOR_RED + "\tRegistration failed";
             }
-            PostLogin login = new PostLogin(this.scanner, this.server, params[0]);
+            PostLogin login = new PostLogin(this.scanner, this.server, this.serverUrl, params[0]);
             login.run();
             return help();
         } else {
@@ -71,7 +73,7 @@ public class PreLogin {
             } catch (ResponseException e) {
                 return SET_TEXT_COLOR_RED + "\tLogin failed";
             }
-            PostLogin login = new PostLogin(this.scanner, this.server, params[0]);
+            PostLogin login = new PostLogin(this.scanner, this.server, this.serverUrl, params[0]);
             login.run();
             return help();
         } else {
