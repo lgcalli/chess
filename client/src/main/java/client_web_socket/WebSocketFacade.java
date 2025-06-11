@@ -12,10 +12,8 @@ import java.net.URISyntaxException;
 
 //need to extend Endpoint for websocket to work properly
 public class WebSocketFacade extends Endpoint {
-
     Session session;
     NotificationHandler notificationHandler;
-
 
     public WebSocketFacade(String url, NotificationHandler notificationHandler) throws ResponseException {
         try {

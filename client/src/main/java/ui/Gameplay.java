@@ -7,7 +7,6 @@ import chess.ChessPosition;
 import client_web_socket.*;
 import exception.ResponseException;
 import websocket.commands.UserGameCommand;
-import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -100,7 +99,7 @@ public class Gameplay implements NotificationHandler {
         ChessPosition position = new ChessPosition(positionB, positionA);
         ChessPiece piece = game.getBoard().getPiece(position);
 
-        if (piece == null || !color.toUpperCase().equals(piece.getTeamColor().toString())){
+        if (piece == null){
             return drawBoard(color, null, 1000, 1000);
         }
 
@@ -122,8 +121,15 @@ public class Gameplay implements NotificationHandler {
         String output = "";
         System.out.print(RESET_TEXT_COLOR + "Are you sure you want to resign? (Y/N)");
         String line = scanner.nextLine();
-
-
+        if (line.equalsIgnoreCase("yes") || line.equalsIgnoreCase("Y")){
+            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
+            try {
+                ws.sendCommand(command);
+            } catch (Throwable e) {
+                var msg = e.toString();
+                System.out.print(SET_TEXT_COLOR_RED + msg);
+            }
+        }
         return output;
     }
 

@@ -5,7 +5,7 @@ import dataaccess.*;
 import model.AuthData;
 import model.UserData;
 import model.GameData;
-import websocket.WebSocketHandler;
+import server_web_socket.WebSocketHandler;
 
 import java.util.Collection;
 import service.Service;
@@ -68,11 +68,10 @@ public class Server {
         AuthDAO authDAO = new MySqlAuthDAO(database);
         GameDAO gameDAO = new MySqlGameDAO(database);
 
-        webSocketHandler = new WebSocketHandler();
+        webSocketHandler = new WebSocketHandler(userDAO, authDAO, gameDAO);
         this.service = new Service(userDAO, authDAO, gameDAO);
 
     }
-
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
