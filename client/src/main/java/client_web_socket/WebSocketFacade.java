@@ -30,7 +30,7 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    NotificationMessage notification = new Gson().fromJson(message, NotificationMessage.class);
+                    ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
                     notificationHandler.notify(notification);
                 }
             });
@@ -44,7 +44,18 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    // UserGameCommandHandling
+    public void sendCommand(UserGameCommand command) throws Exception {
+        String message = new Gson().toJson(command);
+        session.getBasicRemote().sendText(message);
 
+    }
+
+    public void close() {
+        try {
+            this.session.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
 

@@ -1,6 +1,7 @@
 package ui;
 
 import exception.ResponseException;
+import model.AuthData;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -53,12 +54,13 @@ public class PreLogin {
 
     public String register (String... params) throws ResponseException {
         if (params.length == 3){
+            String authToken = "";
             try {
-                server.register(params[0], params[1], params[2]);
+                authToken = server.register(params[0], params[1], params[2]).authToken();
             } catch (ResponseException e) {
                 return SET_TEXT_COLOR_RED + "\tRegistration failed";
             }
-            PostLogin login = new PostLogin(this.scanner, this.server, this.serverUrl, params[0]);
+            PostLogin login = new PostLogin(this.scanner, this.server, this.serverUrl, authToken, params[0]);
             login.run();
             return help();
         } else {
@@ -68,12 +70,13 @@ public class PreLogin {
 
     public String login (String... params) throws ResponseException {
         if (params.length == 2){
+            String authToken = "";
             try {
-                server.login(params[0], params[1]);
+                authToken = server.login(params[0], params[1]).authToken();
             } catch (ResponseException e) {
                 return SET_TEXT_COLOR_RED + "\tLogin failed";
             }
-            PostLogin login = new PostLogin(this.scanner, this.server, this.serverUrl, params[0]);
+            PostLogin login = new PostLogin(this.scanner, this.server, this.serverUrl, authToken, params[0]);
             login.run();
             return help();
         } else {
