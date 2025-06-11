@@ -1,5 +1,6 @@
 package dataaccess;
 
+import com.google.gson.Gson;
 import model.GameData;
 import chess.ChessGame;
 
@@ -59,9 +60,17 @@ public class MemoryGameDAO implements GameDAO{
         games.clear();
     }
 
-    public ChessGame getGame (int gameID) throws DataAccessException {
+    public ChessGame getGame (int gameID) {
         return gamesByGameID.get(gameID).game();
     }
 
+    public void updateGameBoard(int gameID, ChessGame game) {
+        GameData oldGameData = gamesByGameID.get(gameID);
+        GameData newGameData = new GameData(gameID, oldGameData.whiteUsername(), oldGameData.blackUsername(), oldGameData.gameName(), game);
+        games.remove(oldGameData);
+        gamesByGameID.remove(gameID, oldGameData);
+        games.add(newGameData);
+        gamesByGameID.put(gameID, newGameData);
+    }
 
 }

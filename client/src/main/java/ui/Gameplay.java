@@ -53,19 +53,28 @@ public class Gameplay implements NotificationHandler {
             var msg = e.toString();
             System.out.print(SET_TEXT_COLOR_RED + msg);
         }
-
         while (!result.equals("leave")){
             printPrompt();
             String line = scanner.nextLine();
-            try {
-                result = eval(line);
-                System.out.print(RESET_TEXT_COLOR + result);
-            } catch (Throwable e) {
-                var msg = e.toString();
-                System.out.print(SET_TEXT_COLOR_RED + msg);
+            if (color != null) {
+                try {
+                    result = eval(line);
+                    System.out.print(RESET_TEXT_COLOR + result);
+                } catch (Throwable e) {
+                    var msg = e.toString();
+                    System.out.print(SET_TEXT_COLOR_RED + msg);
+                }
+            } else {
+                if (Objects.equals(line, "leave")){
+                    try {
+                        result = leave();
+                    } catch (ResponseException e) {
+                        var msg = e.toString();
+                        System.out.print(SET_TEXT_COLOR_RED + e.toString());
+                    }
+                }
             }
         }
-
     }
 
     private String eval(String input) {
@@ -78,7 +87,7 @@ public class Gameplay implements NotificationHandler {
                 case "move" -> makeMove(params);
                 case "resign" -> resign();
                 case "highlight" -> highlightLegalMoves(params);
-                case "leave" -> "leave";
+                case "leave" -> leave();
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -125,7 +134,7 @@ public class Gameplay implements NotificationHandler {
             throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tError: invalid move");
         }
         if (game.getBoard().getPiece(start).getPieceType() == ChessPiece.PieceType.PAWN){
-            if ((color.equalsIgnoreCase("WHITE") && row2 == 8) || color.equalsIgnoreCase("BLACK") && row2 == 1){
+            if ((color.equalsIgnoreCase("WHITE") && row2 == 8) || (color.equalsIgnoreCase("BLACK") && row2 == 1)){
                 ChessPiece.PieceType promotion = null;
                 while (promotion == null) {
                     System.out.print(RESET_TEXT_COLOR + "What would you like to promote to? (QUEEN/KNIGHT/BISHOP/ROOK)");
@@ -145,7 +154,7 @@ public class Gameplay implements NotificationHandler {
             var msg = e.toString();
             System.out.print(SET_TEXT_COLOR_RED + msg);
         }
-        return "";
+        return "Move: " + params[0] + " to " + params[1];
     }
 
     String resign () throws ResponseException {
@@ -165,20 +174,9 @@ public class Gameplay implements NotificationHandler {
         return output;
     }
 
-    int getRow (String input) throws ResponseException {
-        int row = Integer.parseInt(String.valueOf(input.charAt(1)));
-        if (row > 8 || row < 1){
-            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tInvalid position");
-        }
-        return row;
-    }
+    String leave () throws ResponseException {
 
-    int getColumn (String input)  throws ResponseException {
-        int column = getNumber(String.valueOf(input.charAt(0)));
-        if (column == 1000) {
-            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tInvalid position");
-        }
-        return column;
+        return "leave";
     }
 
     String help () {
@@ -272,6 +270,23 @@ public class Gameplay implements NotificationHandler {
             default -> null;
         };
     }
+
+    int getRow (String input) throws ResponseException {
+        int row = Integer.parseInt(String.valueOf(input.charAt(1)));
+        if (row > 8 || row < 1){
+            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tInvalid position");
+        }
+        return row;
+    }
+
+    int getColumn (String input)  throws ResponseException {
+        int column = getNumber(String.valueOf(input.charAt(0)));
+        if (column == 1000) {
+            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tInvalid position");
+        }
+        return column;
+    }
+
 
     private int getNumber(String a){
         return switch (a) {

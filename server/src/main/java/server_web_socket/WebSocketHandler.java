@@ -1,9 +1,13 @@
 package server_web_socket;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
+import chess.InvalidMoveException;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import com.google.gson.Gson;
 import websocket.messages.ErrorMessage;
@@ -62,14 +66,66 @@ public class WebSocketHandler {
                 }
             }
             case MAKE_MOVE -> {
-
-
+                MakeMoveCommand moveCommand = gson.fromJson(message, MakeMoveCommand.class);
+                String visitorName = moveCommand.getAuthToken();
+                int gameID = moveCommand.getGameID();
+                ChessMove move = moveCommand.getMove();
+                ChessGame game = null;
+                try {
+                    game = gameDAO.getGame(gameID);
+                } catch (DataAccessException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    game.makeMove(move);
+                } catch (InvalidMoveException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    gameDAO.updateGameBoard(gameID, game);
+                } catch (DataAccessException e) {
+                    throw new RuntimeException(e);
+                }
+                LoadGameMessage loadGameMessage = new LoadGameMessage(game);
+                Gson gsonMessage = new Gson();
+                connections.broadcastToInGameNoExclusion(loadGameMessage, gameID); // pass `null` to include everyone
+                NotificationMessage notification = new NotificationMessage(visitorName + " made the move:" + getUserInterfaceMove(move));
+                connections.broadcastToInGame(visitorName, notification, gameID);
             }
             case LEAVE -> {
             }
             case RESIGN -> {
             }
         }
-
     }
+
+    private String getUserInterfaceMove(ChessMove move){
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+        int row1 = start.getRow();
+        int col1 = start.getColumn();
+        int row2 = end.getRow();
+        int col2 = end.getColumn();
+
+        String col1String = getLetter(col1);
+        String col2String = getLetter(col2);
+
+        return col1String + row1 + " -> " + col2String + row2;
+    }
+
+    private String getLetter(int a){
+        return switch (a) {
+            case 1 -> "a";
+            case 2 -> "b";
+            case 3 -> "c";
+            case 4 -> "d";
+            case 5 -> "e";
+            case 6 -> "f";
+            case 7 -> "g";
+            case 8 -> "h";
+            default -> null;
+        };
+    }
+
+
 }

@@ -106,4 +106,14 @@ public class MySqlGameDAO implements GameDAO {
         }
     }
 
+    public void updateGameBoard(int gameID, ChessGame game) throws DataAccessException {
+        if (game == null){
+            throw new DataAccessException(500, "Error: empty game");
+        }
+        var statement = "UPDATE game SET json = ? WHERE gameID = ?";
+        Gson gson = new Gson();
+        String json = gson.toJson(game);
+        db.executeUpdate(statement, json, gameID);
+    }
+
 }
