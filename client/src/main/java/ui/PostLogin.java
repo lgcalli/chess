@@ -147,6 +147,7 @@ public class PostLogin {
         output = output + SET_TEXT_COLOR_BLUE + "\n\tobserve <ID>" + SET_TEXT_COLOR_MAGENTA + " - observe game";
         output = output + SET_TEXT_COLOR_BLUE + "\n\tlogout" + SET_TEXT_COLOR_MAGENTA + " - logout user";
         output = output + SET_TEXT_COLOR_BLUE + "\n\thelp" + SET_TEXT_COLOR_MAGENTA + " - output possible commands" + RESET_TEXT_COLOR;
+        output = output + "\n";
         return output;
     }
 

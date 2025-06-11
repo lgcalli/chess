@@ -91,7 +91,7 @@ public class PreLogin {
         output = output + SET_TEXT_COLOR_MAGENTA  + " - to create a new account";
         output = output + SET_TEXT_COLOR_BLUE + "\n\tlogin <USERNAME> <PASSWORD>" + SET_TEXT_COLOR_MAGENTA  + " - to login to an existing account";
         output = output + SET_TEXT_COLOR_BLUE + "\n\tquit" + SET_TEXT_COLOR_MAGENTA + " - exit application";
-        output = output + SET_TEXT_COLOR_BLUE + "\n\thelp" + SET_TEXT_COLOR_MAGENTA + " - output this list again" + RESET_TEXT_COLOR;
+        output = output + SET_TEXT_COLOR_BLUE + "\n\thelp" + SET_TEXT_COLOR_MAGENTA + " - output this list again" + RESET_TEXT_COLOR + "\n";
         return output;
     }
 }

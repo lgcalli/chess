@@ -73,10 +73,10 @@ public class Gameplay implements NotificationHandler {
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "redraw chess board" -> drawBoard(color, null);
-                case "make move" -> makeMove(params);
+                case "redraw" -> drawBoard(color, null);
+                case "move" -> makeMove(params);
                 case "resign" -> resign();
-                case "highlight legal moves" -> highlightLegalMoves(params);
+                case "highlight" -> highlightLegalMoves(params);
                 case "leave" -> "leave";
                 default -> help();
             };
@@ -97,12 +97,10 @@ public class Gameplay implements NotificationHandler {
         if (positionB > 8 || positionB < 1){
             throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tInvalid position");
         }
+        ChessPosition position = new ChessPosition(positionB, positionA);
+        ChessPiece piece = game.getBoard().getPiece(position);
 
-
-        ChessPosition position = new ChessPosition(positionA, positionB);
-        if (game.getBoard().getPiece(position) == null){
-            return drawBoard(color, null);
-        }
+        System.out.println("ROW:" + position.getRow() + "  COL:" + position.getColumn() + "  PIECE:" + piece.getPieceType());
 
         Collection<ChessMove> validMoves = game.validMoves(position);
         Collection<ChessPosition> endPositions = new ArrayList<>();
@@ -130,30 +128,40 @@ public class Gameplay implements NotificationHandler {
     String help () {
         String output = "\n\t" + SET_TEXT_COLOR_WHITE + SET_TEXT_UNDERLINE + SET_TEXT_BOLD;
         output = output + "COMMANDS" + RESET_TEXT_UNDERLINE + RESET_TEXT_BOLD_FAINT;
-        output = output + SET_TEXT_COLOR_BLUE + "\n\thighlight legal moves <position>";
-        output = output + SET_TEXT_COLOR_BLUE + "\n\tmakeMove <position 1> <position 2>" + SET_TEXT_COLOR_MAGENTA  + " - to make a move";
+        output = output + SET_TEXT_COLOR_BLUE + "\n\tredraw" + SET_TEXT_COLOR_MAGENTA  + " - redraws chess board";
+        output = output + SET_TEXT_COLOR_BLUE + "\n\thighlight <position>" + SET_TEXT_COLOR_MAGENTA  + " - highlight valid moves for piece at position 1";;
+        output = output + SET_TEXT_COLOR_BLUE + "\n\tmove <position 1> <position 2>" + SET_TEXT_COLOR_MAGENTA  + " - make a move from position 1 to position 2";
         output = output + SET_TEXT_COLOR_BLUE + "\n\tleave" + SET_TEXT_COLOR_MAGENTA + " - leave game";
-        output = output + SET_TEXT_COLOR_BLUE + "\n\thelp" + SET_TEXT_COLOR_MAGENTA + " - output this list again" + RESET_TEXT_COLOR;
+        output = output + SET_TEXT_COLOR_BLUE + "\n\thelp" + SET_TEXT_COLOR_MAGENTA + " - output this list again" + RESET_TEXT_COLOR + "\n";
         return output;
     }
 
     String drawBoard (String color, Collection<ChessPosition> endPositions){
-        String chessBoard = "\n";
+        String chessBoard=  "\n" + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE;
+        chessBoard = chessBoard + "    a  b  c  d  e  f  g  h    " + RESET_TEXT_COLOR + RESET_BG_COLOR + "\n";
+
         if (color.equals("black")){
             for (int i = 1; i <= 8; i++){
+                chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + " " + i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR;
                 for (int j = 1; j <= 8; j++){
                     chessBoard = getString(chessBoard, i, j, endPositions);
                 }
-                chessBoard = chessBoard +  RESET_BG_COLOR + "\n";
+                chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + " " + i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR;
+                chessBoard = chessBoard +  "\n";
             }
         } else if (color.equals("white") || color.equals("observe")){
             for (int i = 8; i >= 1; i--){
-                for (int j = 8; j >= 1; j--){
+                chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + " " + i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR;
+                for (int j = 1; j <= 8; j++){
                     chessBoard = getString(chessBoard, i, j, endPositions);
                 }
-                chessBoard = chessBoard + RESET_BG_COLOR + "\n";
+                chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + " " + i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR;
+                chessBoard = chessBoard +  "\n";
             }
+            chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE;
         }
+        chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE;
+        chessBoard = chessBoard + "    a  b  c  d  e  f  g  h    " + RESET_TEXT_COLOR + RESET_BG_COLOR;
         return chessBoard;
     }
 
