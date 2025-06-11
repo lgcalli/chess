@@ -5,6 +5,7 @@ import dataaccess.*;
 import model.AuthData;
 import model.UserData;
 import model.GameData;
+import websocket.WebSocketHandler;
 
 import java.util.Collection;
 import service.Service;
@@ -14,6 +15,7 @@ import chess.ChessGame;
 
 public class Server {
     private final Service service;
+    private final WebSocketHandler webSocketHandler;
 
     record RegisterRequest(
             String username,
@@ -66,7 +68,7 @@ public class Server {
         AuthDAO authDAO = new MySqlAuthDAO(database);
         GameDAO gameDAO = new MySqlGameDAO(database);
 
-
+        webSocketHandler = new WebSocketHandler();
         this.service = new Service(userDAO, authDAO, gameDAO);
 
     }
@@ -76,6 +78,8 @@ public class Server {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        Spark.webSocket("/ws", webSocketHandler);
 
         // Register your endpoints and handle exceptions here.
 

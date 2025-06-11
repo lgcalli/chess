@@ -16,7 +16,7 @@ public class Gameplay {
     private final String color;
     private ChessGame game;
 
-    public Gameplay (Scanner scanner, ServerFacade server, int gameID, String color){
+    public Gameplay (Scanner scanner, ServerFacade server, int gameID, String color) {
         this.scanner = scanner;
         this.server = server;
         this.gameID = gameID;
