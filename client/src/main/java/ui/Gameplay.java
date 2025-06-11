@@ -37,7 +37,7 @@ public class Gameplay implements NotificationHandler {
 
     public void run() {
         System.out.print(help());
-        System.out.print(this.drawBoard(color, null));
+        System.out.print(this.drawBoard(color, null, 1000, 1000));
         var result = "";
         try {
             ws = new WebSocketFacade(serverUrl, this);
@@ -73,7 +73,7 @@ public class Gameplay implements NotificationHandler {
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "redraw" -> drawBoard(color, null);
+                case "redraw" -> drawBoard(color, null, 1000, 1000);
                 case "move" -> makeMove(params);
                 case "resign" -> resign();
                 case "highlight" -> highlightLegalMoves(params);
@@ -100,14 +100,16 @@ public class Gameplay implements NotificationHandler {
         ChessPosition position = new ChessPosition(positionB, positionA);
         ChessPiece piece = game.getBoard().getPiece(position);
 
-        System.out.println("ROW:" + position.getRow() + "  COL:" + position.getColumn() + "  PIECE:" + piece.getPieceType());
+        if (piece == null || !color.toUpperCase().equals(piece.getTeamColor().toString())){
+            return drawBoard(color, null, 1000, 1000);
+        }
 
         Collection<ChessMove> validMoves = game.validMoves(position);
         Collection<ChessPosition> endPositions = new ArrayList<>();
         for (ChessMove move:validMoves){
             endPositions.add(move.getEndPosition());
         }
-        return drawBoard(color, endPositions);
+        return drawBoard(color, endPositions, positionB, positionA);
     }
 
     String makeMove (String... params) throws ResponseException {
@@ -136,7 +138,7 @@ public class Gameplay implements NotificationHandler {
         return output;
     }
 
-    String drawBoard (String color, Collection<ChessPosition> endPositions){
+    String drawBoard (String color, Collection<ChessPosition> endPositions, int row, int column){
         String chessBoard=  "\n" + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE;
         chessBoard = chessBoard + "    a  b  c  d  e  f  g  h    " + RESET_TEXT_COLOR + RESET_BG_COLOR + "\n";
 
@@ -144,7 +146,7 @@ public class Gameplay implements NotificationHandler {
             for (int i = 1; i <= 8; i++){
                 chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + " " + i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR;
                 for (int j = 1; j <= 8; j++){
-                    chessBoard = getString(chessBoard, i, j, endPositions);
+                    chessBoard = getString(chessBoard, i, j, endPositions, row, column);
                 }
                 chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + " " + i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR;
                 chessBoard = chessBoard +  "\n";
@@ -153,7 +155,7 @@ public class Gameplay implements NotificationHandler {
             for (int i = 8; i >= 1; i--){
                 chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + " " + i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR;
                 for (int j = 1; j <= 8; j++){
-                    chessBoard = getString(chessBoard, i, j, endPositions);
+                    chessBoard = getString(chessBoard, i, j, endPositions, row, column);
                 }
                 chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + " " + i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR;
                 chessBoard = chessBoard +  "\n";
@@ -165,7 +167,7 @@ public class Gameplay implements NotificationHandler {
         return chessBoard;
     }
 
-    private String getString(String chessBoard, int i, int j, Collection<ChessPosition> endPositions) {
+    private String getString(String chessBoard, int i, int j, Collection<ChessPosition> endPositions, int row, int column) {
         if (i % 2 == 0 && j % 2 == 0 || i % 2 == 1 && j % 2 == 1){
             chessBoard = chessBoard + SET_BG_COLOR_WHITE;
         } else {
@@ -174,6 +176,8 @@ public class Gameplay implements NotificationHandler {
         ChessPiece piece = game.getBoard().getPiece(new ChessPosition(i, j));
         if (endPositions != null && endPositions.contains(new ChessPosition(i, j))){
             chessBoard = chessBoard + SET_BG_COLOR_YELLOW;
+        } if (row == i && column == j){
+            chessBoard = chessBoard + SET_BG_COLOR_MAGENTA;
         }
         if (piece == null){
             chessBoard = chessBoard + "   ";
