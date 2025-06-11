@@ -88,15 +88,10 @@ public class Gameplay implements NotificationHandler {
         if (params.length != 1 || params[0].isEmpty()){
             throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tExpected: highlight legal moves <position>\t Position example: 'a1'");
         }
-        int positionA = getNumber(String.valueOf(params[0].charAt(0)));
-        if (positionA == 1000) {
-            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tInvalid position");
-        }
-        int positionB = Integer.parseInt(String.valueOf(params[0].charAt(1)));
-        if (positionB > 8 || positionB < 1){
-            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tInvalid position");
-        }
-        ChessPosition position = new ChessPosition(positionB, positionA);
+        int row = getRow(params[0]);
+        int col = getColumn(params[0]);
+
+        ChessPosition position = new ChessPosition(row, col);
         ChessPiece piece = game.getBoard().getPiece(position);
 
         if (piece == null){
@@ -108,14 +103,21 @@ public class Gameplay implements NotificationHandler {
         for (ChessMove move:validMoves){
             endPositions.add(move.getEndPosition());
         }
-        return drawBoard(color, endPositions, positionB, positionA);
+        return drawBoard(color, endPositions, row, col);
     }
 
     String makeMove (String... params) throws ResponseException {
-        String output = "";
-
-        return output;
+        if (params.length != 2) {
+            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tExpected: move <position 1> <position 2>");
+        } else {
+            int row1 = getRow(params[0]);
+            int col1 = getColumn(params[0]);
+            int row2 = getRow(params[1]);
+            int col2 = getColumn(params[1]);
+        }
+        return "";
     }
+
 
     String resign () throws ResponseException {
         String output = "";
@@ -131,6 +133,22 @@ public class Gameplay implements NotificationHandler {
             }
         }
         return output;
+    }
+
+    int getRow (String input) throws ResponseException {
+        int row = Integer.parseInt(String.valueOf(input.charAt(1)));
+        if (row > 8 || row < 1){
+            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tInvalid position");
+        }
+        return row;
+    }
+
+    int getColumn (String input)  throws ResponseException {
+        int column = getNumber(String.valueOf(input.charAt(0)));
+        if (column == 1000) {
+            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tInvalid position");
+        }
+        return column;
     }
 
     String help () {

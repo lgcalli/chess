@@ -58,4 +58,10 @@ public class MemoryGameDAO implements GameDAO{
         gamesByGameID.clear();
         games.clear();
     }
+
+    public ChessGame getGame (int gameID) throws DataAccessException {
+        return gamesByGameID.get(gameID).game();
+    }
+
+
 }
