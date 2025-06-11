@@ -6,6 +6,8 @@ import chess.ChessPiece;
 import chess.ChessPosition;
 import client_web_socket.*;
 import exception.ResponseException;
+import websocket.commands.ConnectCommand;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -44,7 +46,7 @@ public class Gameplay implements NotificationHandler {
             var msg = e.toString();
             System.out.print(SET_TEXT_COLOR_RED + msg);
         }
-        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
+        UserGameCommand command = new ConnectCommand(authToken, gameID);
         try {
             ws.sendCommand(command);
         } catch (Throwable e) {
@@ -109,19 +111,47 @@ public class Gameplay implements NotificationHandler {
     String makeMove (String... params) throws ResponseException {
         if (params.length != 2) {
             throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tExpected: move <position 1> <position 2>");
+        }
+        int row1 = getRow(params[0]);
+        int col1 = getColumn(params[0]);
+        int row2 = getRow(params[1]);
+        int col2 = getColumn(params[1]);
+        ChessPosition start = new ChessPosition(row1, col1);
+        ChessPosition end = new ChessPosition(row2, col2);
+        ChessMove move = new ChessMove(start, end, null);
+        Collection <ChessMove> validMoves = game.validMoves(start);
+        UserGameCommand command = null;
+        if (!validMoves.contains(move)){
+            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tError: invalid move");
+        }
+        if (game.getBoard().getPiece(start).getPieceType() == ChessPiece.PieceType.PAWN){
+            if ((color.equalsIgnoreCase("WHITE") && row2 == 8) || color.equalsIgnoreCase("BLACK") && row2 == 1){
+                ChessPiece.PieceType promotion = null;
+                while (promotion == null) {
+                    System.out.print(RESET_TEXT_COLOR + "What would you like to promote to? (QUEEN/KNIGHT/BISHOP/ROOK)");
+                    printPrompt();
+                    String line = scanner.nextLine();
+                    promotion = getPieceTypePromotion(line);
+                }
+                ChessMove promotionMove = new ChessMove(start, end, promotion);
+                command = new MakeMoveCommand(authToken, gameID, promotionMove);
+            }
         } else {
-            int row1 = getRow(params[0]);
-            int col1 = getColumn(params[0]);
-            int row2 = getRow(params[1]);
-            int col2 = getColumn(params[1]);
+           command = new MakeMoveCommand(authToken, gameID, move);
+        }
+        try {
+            ws.sendCommand(command);
+        } catch (Throwable e) {
+            var msg = e.toString();
+            System.out.print(SET_TEXT_COLOR_RED + msg);
         }
         return "";
     }
 
-
     String resign () throws ResponseException {
         String output = "";
         System.out.print(RESET_TEXT_COLOR + "Are you sure you want to resign? (Y/N)");
+        printPrompt();
         String line = scanner.nextLine();
         if (line.equalsIgnoreCase("yes") || line.equalsIgnoreCase("Y")){
             UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
@@ -168,26 +198,26 @@ public class Gameplay implements NotificationHandler {
 
         if (color.equals("black")){
             for (int i = 1; i <= 8; i++){
-                chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + " " + i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR;
-                for (int j = 1; j <= 8; j++){
-                    chessBoard = getString(chessBoard, i, j, endPositions, row, column);
-                }
-                chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + " " + i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR;
-                chessBoard = chessBoard +  "\n";
+                chessBoard = outputColumn(endPositions, row, column, chessBoard, i);
             }
         } else if (color.equals("white") || color.equals("observe")){
             for (int i = 8; i >= 1; i--){
-                chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + " " + i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR;
-                for (int j = 1; j <= 8; j++){
-                    chessBoard = getString(chessBoard, i, j, endPositions, row, column);
-                }
-                chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + " " + i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR;
-                chessBoard = chessBoard +  "\n";
+                chessBoard = outputColumn(endPositions, row, column, chessBoard, i);
             }
             chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE;
         }
         chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE;
         chessBoard = chessBoard + "    a  b  c  d  e  f  g  h    " + RESET_TEXT_COLOR + RESET_BG_COLOR;
+        return chessBoard;
+    }
+
+    private String outputColumn(Collection<ChessPosition> endPositions, int row, int column, String chessBoard, int i) {
+        chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + " " + i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR;
+        for (int j = 1; j <= 8; j++){
+            chessBoard = getString(chessBoard, i, j, endPositions, row, column);
+        }
+        chessBoard = chessBoard + SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + " " + i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR;
+        chessBoard = chessBoard +  "\n";
         return chessBoard;
     }
 
@@ -229,6 +259,16 @@ public class Gameplay implements NotificationHandler {
             case ChessPiece.PieceType.KNIGHT -> knight;
             case ChessPiece.PieceType.ROOK -> rook;
             case ChessPiece.PieceType.PAWN -> pawn;
+            default -> null;
+        };
+    }
+
+    private ChessPiece.PieceType getPieceTypePromotion(String piece) {
+        return switch (piece) {
+            case "QUEEN" -> ChessPiece.PieceType.QUEEN;
+            case "KNIGHT" -> ChessPiece.PieceType.KNIGHT;
+            case "BISHOP" -> ChessPiece.PieceType.BISHOP;
+            case "ROOK" -> ChessPiece.PieceType.ROOK;
             default -> null;
         };
     }
