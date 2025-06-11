@@ -1,9 +1,7 @@
 package server_web_socket;
 
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.ChessPosition;
-import chess.InvalidMoveException;
+import chess.*;
+import exception.ResponseException;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -16,6 +14,7 @@ import websocket.messages.NotificationMessage;
 import dataaccess.*;
 
 import java.io.IOException;
+import java.util.Collection;
 
 
 @WebSocket
@@ -31,7 +30,6 @@ public class WebSocketHandler {
         this.authDAO = authDAO;
         this.gameDAO = gameDAO;
     }
-
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws IOException {
@@ -61,7 +59,7 @@ public class WebSocketHandler {
                         connections.broadcastToInGame(visitorName, notification, gameID);
                     }
                 } catch (DataAccessException e){
-                    ErrorMessage error = new ErrorMessage("Error: Server data access failure");
+                    ErrorMessage error = new ErrorMessage("Error: server data access failure");
                     session.getRemote().sendString(gson.toJson(error));
                 }
             }
@@ -71,20 +69,46 @@ public class WebSocketHandler {
                 int gameID = moveCommand.getGameID();
                 ChessMove move = moveCommand.getMove();
                 ChessGame game = null;
+
+                System.out.println(visitorName);
+                System.out.println(gameID);
+
                 try {
+                    String username = authDAO.getUser(visitorName);
+                    if (username == null) {
+                        ErrorMessage newErrorMessage = new ErrorMessage("Error: user not found");
+                        session.getRemote().sendString(gson.toJson(newErrorMessage));
+                        return;
+                    } else if (gameDAO.getGame(gameID) == null) {
+                        ErrorMessage newErrorMessage = new ErrorMessage("Error: game not found");
+                        session.getRemote().sendString(gson.toJson(newErrorMessage));
+                        return;
+                    }
                     game = gameDAO.getGame(gameID);
+                    ChessGame.TeamColor color = gameDAO.getPlayerColor(gameID, username);
+                    if (game.getBoard().getPiece(move.getStartPosition()).getTeamColor() != color){
+                        ErrorMessage newErrorMessage = new ErrorMessage("Error: unable to move piece");
+                        session.getRemote().sendString(gson.toJson(newErrorMessage));
+                        return;
+                    }
+                    Collection<ChessMove> validMoves = game.validMoves(move.getStartPosition());
+                    if (!validMoves.contains(move)){
+                        ErrorMessage error = new ErrorMessage("Error: invalid move");
+                        session.getRemote().sendString(gson.toJson(error));
+                        return;
+                    }
                 } catch (DataAccessException e) {
-                    throw new RuntimeException(e);
+                    ErrorMessage error = new ErrorMessage("Error: server data access failure");
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
                 }
                 try {
                     game.makeMove(move);
-                } catch (InvalidMoveException e) {
-                    throw new RuntimeException(e);
-                }
-                try {
                     gameDAO.updateGameBoard(gameID, game);
-                } catch (DataAccessException e) {
-                    throw new RuntimeException(e);
+                } catch (Exception e) {
+                    ErrorMessage error = new ErrorMessage("Error: Server data access failure");
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
                 }
                 LoadGameMessage loadGameMessage = new LoadGameMessage(game);
                 Gson gsonMessage = new Gson();

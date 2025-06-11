@@ -30,8 +30,8 @@ public class Gameplay implements NotificationHandler {
         this.scanner = scanner;
         this.server = server;
         this.authToken = authToken;
-        this.gameID = gameID;
         this.color = color;
+        this.gameID = gameID;
         this.game = new ChessGame();
         this.serverUrl = serverUrl;
     }
@@ -56,23 +56,12 @@ public class Gameplay implements NotificationHandler {
         while (!result.equals("leave")){
             printPrompt();
             String line = scanner.nextLine();
-            if (color != null) {
-                try {
-                    result = eval(line);
-                    System.out.print(RESET_TEXT_COLOR + result);
-                } catch (Throwable e) {
-                    var msg = e.toString();
-                    System.out.print(SET_TEXT_COLOR_RED + msg);
-                }
-            } else {
-                if (Objects.equals(line, "leave")){
-                    try {
-                        result = leave();
-                    } catch (ResponseException e) {
-                        var msg = e.toString();
-                        System.out.print(SET_TEXT_COLOR_RED + e.toString());
-                    }
-                }
+            try {
+                result = eval(line);
+                System.out.print(RESET_TEXT_COLOR + result);
+            } catch (Throwable e) {
+                var msg = e.toString();
+                System.out.print(SET_TEXT_COLOR_RED + msg);
             }
         }
     }
@@ -127,27 +116,22 @@ public class Gameplay implements NotificationHandler {
         int col2 = getColumn(params[1]);
         ChessPosition start = new ChessPosition(row1, col1);
         ChessPosition end = new ChessPosition(row2, col2);
-        ChessMove move = new ChessMove(start, end, null);
-        Collection <ChessMove> validMoves = game.validMoves(start);
-        UserGameCommand command = null;
-        if (!validMoves.contains(move)){
-            throw new ResponseException(400, SET_TEXT_COLOR_RED + "\tError: invalid move");
-        }
-        if (game.getBoard().getPiece(start).getPieceType() == ChessPiece.PieceType.PAWN){
-            if ((color.equalsIgnoreCase("WHITE") && row2 == 8) || (color.equalsIgnoreCase("BLACK") && row2 == 1)){
-                ChessPiece.PieceType promotion = null;
-                while (promotion == null) {
-                    System.out.print(RESET_TEXT_COLOR + "What would you like to promote to? (QUEEN/KNIGHT/BISHOP/ROOK)");
-                    printPrompt();
-                    String line = scanner.nextLine();
-                    promotion = getPieceTypePromotion(line);
-                }
-                ChessMove promotionMove = new ChessMove(start, end, promotion);
-                command = new MakeMoveCommand(authToken, gameID, promotionMove);
+        ChessMove move = null;
+
+        Collection<ChessMove> validMoves = game.validMoves(start);
+        if (validMoves.contains(new ChessMove(start, end, ChessPiece.PieceType.QUEEN))){
+            ChessPiece.PieceType promotion = null;
+            while (promotion == null) {
+                System.out.print(RESET_TEXT_COLOR + "What would you like to promote to? (QUEEN/KNIGHT/BISHOP/ROOK)");
+                printPrompt();
+                String line = scanner.nextLine();
+                promotion = getPieceTypePromotion(line);
             }
+            move = new ChessMove(start, end, promotion);
         } else {
-           command = new MakeMoveCommand(authToken, gameID, move);
+            move = new ChessMove(start, end, null);
         }
+        MakeMoveCommand command =  new MakeMoveCommand(authToken, gameID, move);
         try {
             ws.sendCommand(command);
         } catch (Throwable e) {
