@@ -24,15 +24,7 @@ public class PreLogin {
         System.out.print(help());
         var result = "";
         while (!result.equals("quit")) {
-            printPrompt();
-            String line = scanner.nextLine();
-            try {
-                result = eval(line);
-                System.out.print(RESET_TEXT_COLOR + result);
-            } catch (Throwable e) {
-                var msg = e.toString();
-                System.out.print(SET_TEXT_COLOR_RED + msg);
-            }
+             loop(result);
         }
     }
 
@@ -97,5 +89,17 @@ public class PreLogin {
 
     private void printPrompt() {
         System.out.print("\n" + SET_TEXT_COLOR_WHITE + ">>> " + SET_TEXT_COLOR_GREEN);
+    }
+
+    private void loop (String result) {
+        printPrompt();
+        String line = scanner.nextLine();
+        try {
+            result = eval(line);
+            System.out.print(RESET_TEXT_COLOR + result);
+        } catch (Throwable e) {
+            var msg = e.toString();
+            System.out.print(SET_TEXT_COLOR_RED + msg);
+        }
     }
 }

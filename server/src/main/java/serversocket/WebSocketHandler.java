@@ -84,7 +84,8 @@ public class WebSocketHandler {
             case MAKE_MOVE -> {
                 MakeMoveCommand moveCommand = gson.fromJson(message, MakeMoveCommand.class);
                 ChessMove move = moveCommand.getMove();
-                makeMove (gameID, session, move, gson, game, username, visitorName);
+                makeMoveParameters parameters = new makeMoveParameters(gameID, session, move, gson, game, username, visitorName);
+                makeMove (parameters);
             }
             case LEAVE -> {
                 try {
@@ -130,50 +131,52 @@ public class WebSocketHandler {
         }
     }
 
-    private void makeMove (int gameID, Session session, ChessMove move, Gson gson, ChessGame game, String username, String visitorName)  throws IOException{
+    private void makeMove (makeMoveParameters parameters) throws IOException{
         try {
-            boolean gameOver = gameDAO.getGameOver(gameID);
+            boolean gameOver = gameDAO.getGameOver(parameters.gameID);
             if (gameOver){
                 ErrorMessage newErrorMessage = new ErrorMessage("game is over, cannot make any more moves");
-                session.getRemote().sendString(gson.toJson(newErrorMessage));
+                parameters.session.getRemote().sendString(parameters.gson.toJson(newErrorMessage));
                 return;
             }
         } catch (DataAccessException e) {
             ErrorMessage newErrorMessage = new ErrorMessage("unable to move piece");
-            session.getRemote().sendString(gson.toJson(newErrorMessage));
+            parameters.session.getRemote().sendString(parameters.gson.toJson(newErrorMessage));
             return;
         }
 
         try {
-            ChessGame.TeamColor color = gameDAO.getPlayerColor(gameID, username);
-            if (game.getBoard().getPiece(move.getStartPosition()).getTeamColor() != color){
+            ChessGame.TeamColor color = gameDAO.getPlayerColor(parameters.gameID, parameters.username);
+            if (parameters.game.getBoard().getPiece(parameters.move.getStartPosition()).getTeamColor() != color){
                 ErrorMessage newErrorMessage = new ErrorMessage("unable to move piece");
-                session.getRemote().sendString(gson.toJson(newErrorMessage));
+                parameters.session.getRemote().sendString(parameters.gson.toJson(newErrorMessage));
                 return;
             }
-            Collection<ChessMove> validMoves = game.validMoves(move.getStartPosition());
-            if (!validMoves.contains(move)){
+            Collection<ChessMove> validMoves = parameters.game.validMoves(parameters.move.getStartPosition());
+            if (!validMoves.contains(parameters.move)){
                 ErrorMessage error = new ErrorMessage("invalid move");
-                session.getRemote().sendString(gson.toJson(error));
+                parameters.session.getRemote().sendString(parameters.gson.toJson(error));
                 return;
             }
         } catch (DataAccessException e) {
             ErrorMessage error = new ErrorMessage("could not make move");
-            session.getRemote().sendString(gson.toJson(error));
+            parameters.session.getRemote().sendString(parameters.gson.toJson(error));
             return;
         }
         try {
-            game.makeMove(move);
-            gameDAO.updateGameBoard(gameID, game);
+            parameters.game.makeMove(parameters.move);
+            gameDAO.updateGameBoard(parameters.gameID, parameters.game);
         } catch (Exception e) {
             ErrorMessage error = new ErrorMessage("not your turn");
-            session.getRemote().sendString(gson.toJson(error));
+            parameters.session.getRemote().sendString(parameters.gson.toJson(error));
             return;
         }
-        LoadGameMessage loadGameMessage = new LoadGameMessage(game);
-        connections.broadcastToInGameNoExclusion(loadGameMessage, gameID);
-        NotificationMessage notification = new NotificationMessage(username + " made the move:" + getUserInterfaceMove(move));
-        connections.broadcastToInGame(visitorName, notification, gameID);
+        LoadGameMessage loadGameMessage = new LoadGameMessage(parameters.game);
+        connections.broadcastToInGameNoExclusion(loadGameMessage, parameters.gameID);
+        String s = parameters.username + " made the move:" + getUserInterfaceMove(parameters.move);
+
+        NotificationMessage notification = new NotificationMessage(s);
+        connections.broadcastToInGame(parameters.visitorName, notification, parameters.gameID);
     }
 
     private String getUserInterfaceMove(ChessMove move){
@@ -202,6 +205,27 @@ public class WebSocketHandler {
             case 8 -> "h";
             default -> null;
         };
+    }
+
+    public class makeMoveParameters {
+        public int gameID;
+        public Session session;
+        public ChessMove move;
+        public Gson gson;
+        public ChessGame game;
+        public String username;
+        public String visitorName;
+
+        public makeMoveParameters(int gameID, Session session, ChessMove move, Gson gson,
+                           ChessGame game, String username, String visitorName) {
+            this.gameID = gameID;
+            this.session = session;
+            this.move = move;
+            this.gson = gson;
+            this.game = game;
+            this.username = username;
+            this.visitorName = visitorName;
+        }
     }
 
 
