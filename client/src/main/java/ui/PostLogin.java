@@ -29,7 +29,15 @@ public class PostLogin {
 
         var result = "";
         while (!result.equals("logout")) {
-            loop(result);
+            printPrompt();
+            String line = scanner.nextLine();
+            try {
+                result = eval(line);
+                System.out.print(RESET_TEXT_COLOR + result);
+            } catch (Throwable e) {
+                var msg = e.toString();
+                System.out.print(SET_TEXT_COLOR_RED + msg);
+            }
         }
     }
 
@@ -143,18 +151,4 @@ public class PostLogin {
     private void printPrompt() {
         System.out.print("\n" + SET_TEXT_COLOR_WHITE + ">>> " + SET_TEXT_COLOR_GREEN);
     }
-
-    private void loop (String result) {
-        printPrompt();
-        String line = scanner.nextLine();
-        try {
-            result = eval(line);
-            System.out.print(RESET_TEXT_COLOR + result);
-        } catch (Throwable e) {
-            var msg = e.toString();
-            System.out.print(SET_TEXT_COLOR_RED + msg);
-        }
-    }
-
-
 }

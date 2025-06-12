@@ -84,7 +84,7 @@ public class WebSocketHandler {
             case MAKE_MOVE -> {
                 MakeMoveCommand moveCommand = gson.fromJson(message, MakeMoveCommand.class);
                 ChessMove move = moveCommand.getMove();
-                makeMoveParameters parameters = new makeMoveParameters(gameID, session, move, gson, game, username, visitorName);
+                MakeMoveParameters parameters = new MakeMoveParameters(gameID, session, move, gson, game, username, visitorName);
                 makeMove (parameters);
             }
             case LEAVE -> {
@@ -131,7 +131,7 @@ public class WebSocketHandler {
         }
     }
 
-    private void makeMove (makeMoveParameters parameters) throws IOException{
+    private void makeMove (MakeMoveParameters parameters) throws IOException{
         try {
             boolean gameOver = gameDAO.getGameOver(parameters.gameID);
             if (gameOver){
@@ -207,7 +207,7 @@ public class WebSocketHandler {
         };
     }
 
-    public class makeMoveParameters {
+    public class MakeMoveParameters {
         public int gameID;
         public Session session;
         public ChessMove move;
@@ -216,7 +216,7 @@ public class WebSocketHandler {
         public String username;
         public String visitorName;
 
-        public makeMoveParameters(int gameID, Session session, ChessMove move, Gson gson,
+        public MakeMoveParameters(int gameID, Session session, ChessMove move, Gson gson,
                            ChessGame game, String username, String visitorName) {
             this.gameID = gameID;
             this.session = session;
