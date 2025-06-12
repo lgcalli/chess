@@ -141,5 +141,27 @@ public class MySqlGameDAO implements GameDAO {
         }
     }
 
+    public void leaveGame(int gameID, ChessGame.TeamColor color) throws DataAccessException {
+        String statement = null;
+        if (color == ChessGame.TeamColor.WHITE){
+            statement = "UPDATE game SET whiteUsername = NULL WHERE gameID = ?";
+        } else {
+            statement = "UPDATE game SET blackUsername = NULL WHERE gameID = ?";
+
+        }
+        db.executeUpdate(statement, gameID);
+    }
+
+    public boolean getGameOver(int gameID) throws DataAccessException {
+        ChessGame game = getGame(gameID);
+        return game.getGameOver();
+    }
+
+    public void setGameOver (int gameID, boolean isGameOver) throws DataAccessException {
+        ChessGame game = getGame(gameID);
+        game.setGameOver(isGameOver);
+        updateGameBoard(gameID, game);
+    }
+
 
 }

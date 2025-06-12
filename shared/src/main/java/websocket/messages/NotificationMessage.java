@@ -13,6 +13,6 @@ public class NotificationMessage extends ServerMessage{
 
     @Override
     public String toString() {
-        return "Notification: " + message;
+        return message;
     }
 }

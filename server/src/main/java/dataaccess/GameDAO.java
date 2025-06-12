@@ -18,4 +18,11 @@ public interface GameDAO {
     void updateGameBoard(int gameID, ChessGame game) throws DataAccessException;
 
     ChessGame.TeamColor getPlayerColor (int gameID, String username) throws DataAccessException;
+
+    void leaveGame(int gameID, ChessGame.TeamColor color) throws DataAccessException;
+
+    boolean getGameOver(int gameID) throws DataAccessException;
+
+    public void setGameOver (int gameID, boolean isGameOver) throws DataAccessException;
+
 }

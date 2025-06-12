@@ -12,11 +12,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ChessGame {
     private TeamColor teamTurn;
     private ChessBoard board;
+    private boolean gameOver;
 
     public ChessGame() {
         this.teamTurn = TeamColor.WHITE;
         this.board = new ChessBoard();
         board.resetBoard();
+        gameOver = false;
     }
 
     /**
@@ -197,5 +199,14 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return this.board;
+    }
+
+
+    public void setGameOver(boolean isOver) {
+        this.gameOver = isOver;
+    }
+
+    public boolean getGameOver() {
+        return this.gameOver;
     }
 }

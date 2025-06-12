@@ -83,4 +83,29 @@ public class MemoryGameDAO implements GameDAO{
         return null;
     }
 
+    public void leaveGame(int gameID, ChessGame.TeamColor color) throws DataAccessException {
+        GameData oldGameData = gamesByGameID.get(gameID);
+        GameData newGameData = null;
+        if (color == ChessGame.TeamColor.WHITE){
+            newGameData = new GameData(gameID, null, oldGameData.blackUsername(), oldGameData.gameName(), oldGameData.game());
+        } else if (color == ChessGame.TeamColor.BLACK){
+            newGameData = new GameData(gameID, oldGameData.whiteUsername(), null, oldGameData.gameName(), oldGameData.game());
+        }
+        games.remove(oldGameData);
+        gamesByGameID.remove(gameID, oldGameData);
+        games.add(newGameData);
+        gamesByGameID.put(gameID, newGameData);
+    }
+
+    public boolean getGameOver(int gameID) throws DataAccessException {
+        ChessGame game = getGame(gameID);
+        return game.getGameOver();
+    }
+
+    public void setGameOver (int gameID, boolean isGameOver) throws DataAccessException {
+        ChessGame game = getGame(gameID);
+        game.setGameOver(isGameOver);
+        updateGameBoard(gameID, game);
+    }
+
 }
