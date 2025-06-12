@@ -1,7 +1,6 @@
 package ui;
 
 import java.util.Scanner;
-import client_web_socket.*;
 
 public class ChessClient {
     private final ServerFacade server;

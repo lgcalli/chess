@@ -2,12 +2,9 @@ package ui;
 
 import static ui.EscapeSequences.*;
 
-import client_web_socket.NotificationHandler;
-import client_web_socket.WebSocketFacade;
 import exception.ResponseException;
 import model.GameData;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class PostLogin {
@@ -32,7 +29,7 @@ public class PostLogin {
 
         var result = "";
         while (!result.equals("logout")) {
-            System.out.print("\n" + SET_TEXT_COLOR_WHITE + ">>> " + SET_TEXT_COLOR_GREEN);
+            printPrompt();
             String line = scanner.nextLine();
             try {
                 result = eval(line);
@@ -150,5 +147,11 @@ public class PostLogin {
         output = output + "\n";
         return output;
     }
+
+    private void printPrompt() {
+        System.out.print("\n" + SET_TEXT_COLOR_WHITE + ">>> " + SET_TEXT_COLOR_GREEN);
+    }
+
+
 
 }

@@ -1,4 +1,4 @@
-package server_web_socket;
+package serversocket;
 
 import org.eclipse.jetty.websocket.api.Session;
 import java.io.IOException;

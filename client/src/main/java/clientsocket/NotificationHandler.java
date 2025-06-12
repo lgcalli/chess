@@ -1,6 +1,5 @@
-package client_web_socket;
+package clientsocket;
 import websocket.messages.*;
-import websocket.commands.*;
 
 public interface NotificationHandler {
     void notify(ServerMessage notification);

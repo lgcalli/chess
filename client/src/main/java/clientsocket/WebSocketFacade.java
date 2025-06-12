@@ -1,5 +1,4 @@
-package client_web_socket;
-import static websocket.messages.ServerMessage.ServerMessageType.*;
+package clientsocket;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import websocket.commands.*;

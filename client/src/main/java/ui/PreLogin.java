@@ -24,7 +24,7 @@ public class PreLogin {
         System.out.print(help());
         var result = "";
         while (!result.equals("quit")) {
-            System.out.print("\n" + SET_TEXT_COLOR_WHITE + ">>> " + SET_TEXT_COLOR_GREEN);
+            printPrompt();
             String line = scanner.nextLine();
             try {
                 result = eval(line);
@@ -93,5 +93,9 @@ public class PreLogin {
         output = output + SET_TEXT_COLOR_BLUE + "\n\tquit" + SET_TEXT_COLOR_MAGENTA + " - exit application";
         output = output + SET_TEXT_COLOR_BLUE + "\n\thelp" + SET_TEXT_COLOR_MAGENTA + " - output this list again" + RESET_TEXT_COLOR + "\n";
         return output;
+    }
+
+    private void printPrompt() {
+        System.out.print("\n" + SET_TEXT_COLOR_WHITE + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 }

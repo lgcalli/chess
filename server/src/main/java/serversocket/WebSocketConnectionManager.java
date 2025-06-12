@@ -1,4 +1,4 @@
-package server_web_socket;
+package serversocket;
 
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
@@ -6,7 +6,6 @@ import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
-import java.rmi.ServerError;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -51,22 +50,6 @@ public class WebSocketConnectionManager {
                 if (!c.session.isOpen()) {
                     removeList.add(c);
                 }
-            }
-        }
-        for (var c : removeList) {
-            connections.remove(c.visitorName);
-        }
-    }
-
-    public void broadcast(String excludeVisitorName, NotificationMessage notification) throws IOException {
-        var removeList = new ArrayList<WebSocketConnection>();
-        for (var c : connections.values()) {
-            if (c.session.isOpen()) {
-                if (!c.visitorName.equals(excludeVisitorName)) {
-                    c.send(notification.toString());
-                }
-            } else {
-                removeList.add(c);
             }
         }
         for (var c : removeList) {

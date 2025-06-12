@@ -5,7 +5,7 @@ import dataaccess.*;
 import model.AuthData;
 import model.UserData;
 import model.GameData;
-import server_web_socket.WebSocketHandler;
+import serversocket.WebSocketHandler;
 
 import java.util.Collection;
 import service.Service;

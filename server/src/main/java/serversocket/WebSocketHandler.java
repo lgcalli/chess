@@ -1,4 +1,4 @@
-package server_web_socket;
+package serversocket;
 
 import chess.*;
 import org.eclipse.jetty.websocket.api.Session;
@@ -84,50 +84,7 @@ public class WebSocketHandler {
             case MAKE_MOVE -> {
                 MakeMoveCommand moveCommand = gson.fromJson(message, MakeMoveCommand.class);
                 ChessMove move = moveCommand.getMove();
-
-                try {
-                    boolean gameOver = gameDAO.getGameOver(gameID);
-                    if (gameOver){
-                        ErrorMessage newErrorMessage = new ErrorMessage("game is over, cannot make any more moves");
-                        session.getRemote().sendString(gson.toJson(newErrorMessage));
-                        return;
-                    }
-                } catch (DataAccessException e) {
-                    ErrorMessage newErrorMessage = new ErrorMessage("unable to move piece");
-                    session.getRemote().sendString(gson.toJson(newErrorMessage));
-                    return;
-                }
-
-                try {
-                    ChessGame.TeamColor color = gameDAO.getPlayerColor(gameID, username);
-                    if (game.getBoard().getPiece(move.getStartPosition()).getTeamColor() != color){
-                        ErrorMessage newErrorMessage = new ErrorMessage("unable to move piece");
-                        session.getRemote().sendString(gson.toJson(newErrorMessage));
-                        return;
-                    }
-                    Collection<ChessMove> validMoves = game.validMoves(move.getStartPosition());
-                    if (!validMoves.contains(move)){
-                        ErrorMessage error = new ErrorMessage("invalid move");
-                        session.getRemote().sendString(gson.toJson(error));
-                        return;
-                    }
-                } catch (DataAccessException e) {
-                    ErrorMessage error = new ErrorMessage("could not make move");
-                    session.getRemote().sendString(gson.toJson(error));
-                    return;
-                }
-                try {
-                    game.makeMove(move);
-                    gameDAO.updateGameBoard(gameID, game);
-                } catch (Exception e) {
-                    ErrorMessage error = new ErrorMessage("not your turn");
-                    session.getRemote().sendString(gson.toJson(error));
-                    return;
-                }
-                LoadGameMessage loadGameMessage = new LoadGameMessage(game);
-                connections.broadcastToInGameNoExclusion(loadGameMessage, gameID);
-                NotificationMessage notification = new NotificationMessage(username + " made the move:" + getUserInterfaceMove(move));
-                connections.broadcastToInGame(visitorName, notification, gameID);
+                makeMove (gameID, session, move, gson, game, username, visitorName);
             }
             case LEAVE -> {
                 try {
@@ -171,6 +128,52 @@ public class WebSocketHandler {
                 connections.broadcastToInGameNoExclusion(notification, gameID);
             }
         }
+    }
+
+    private void makeMove (int gameID, Session session, ChessMove move, Gson gson, ChessGame game, String username, String visitorName)  throws IOException{
+        try {
+            boolean gameOver = gameDAO.getGameOver(gameID);
+            if (gameOver){
+                ErrorMessage newErrorMessage = new ErrorMessage("game is over, cannot make any more moves");
+                session.getRemote().sendString(gson.toJson(newErrorMessage));
+                return;
+            }
+        } catch (DataAccessException e) {
+            ErrorMessage newErrorMessage = new ErrorMessage("unable to move piece");
+            session.getRemote().sendString(gson.toJson(newErrorMessage));
+            return;
+        }
+
+        try {
+            ChessGame.TeamColor color = gameDAO.getPlayerColor(gameID, username);
+            if (game.getBoard().getPiece(move.getStartPosition()).getTeamColor() != color){
+                ErrorMessage newErrorMessage = new ErrorMessage("unable to move piece");
+                session.getRemote().sendString(gson.toJson(newErrorMessage));
+                return;
+            }
+            Collection<ChessMove> validMoves = game.validMoves(move.getStartPosition());
+            if (!validMoves.contains(move)){
+                ErrorMessage error = new ErrorMessage("invalid move");
+                session.getRemote().sendString(gson.toJson(error));
+                return;
+            }
+        } catch (DataAccessException e) {
+            ErrorMessage error = new ErrorMessage("could not make move");
+            session.getRemote().sendString(gson.toJson(error));
+            return;
+        }
+        try {
+            game.makeMove(move);
+            gameDAO.updateGameBoard(gameID, game);
+        } catch (Exception e) {
+            ErrorMessage error = new ErrorMessage("not your turn");
+            session.getRemote().sendString(gson.toJson(error));
+            return;
+        }
+        LoadGameMessage loadGameMessage = new LoadGameMessage(game);
+        connections.broadcastToInGameNoExclusion(loadGameMessage, gameID);
+        NotificationMessage notification = new NotificationMessage(username + " made the move:" + getUserInterfaceMove(move));
+        connections.broadcastToInGame(visitorName, notification, gameID);
     }
 
     private String getUserInterfaceMove(ChessMove move){

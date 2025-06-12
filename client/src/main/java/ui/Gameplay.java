@@ -4,7 +4,7 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
-import client_web_socket.*;
+import clientsocket.*;
 import exception.ResponseException;
 import websocket.commands.ConnectCommand;
 import websocket.commands.LeaveCommand;
@@ -13,7 +13,6 @@ import websocket.commands.UserGameCommand;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.ServerMessage;
 
-import java.io.IOException;
 import java.util.*;
 
 import static ui.EscapeSequences.*;
@@ -173,8 +172,10 @@ public class Gameplay implements NotificationHandler {
         String output = "\n\t" + SET_TEXT_COLOR_WHITE + SET_TEXT_UNDERLINE + SET_TEXT_BOLD;
         output = output + "COMMANDS" + RESET_TEXT_UNDERLINE + RESET_TEXT_BOLD_FAINT;
         output = output + SET_TEXT_COLOR_BLUE + "\n\tredraw" + SET_TEXT_COLOR_MAGENTA  + " - redraws chess board";
-        output = output + SET_TEXT_COLOR_BLUE + "\n\thighlight <position>" + SET_TEXT_COLOR_MAGENTA  + " - highlight valid moves for piece at position 1";;
-        output = output + SET_TEXT_COLOR_BLUE + "\n\tmove <position 1> <position 2>" + SET_TEXT_COLOR_MAGENTA  + " - make a move from position 1 to position 2";
+        output = output + SET_TEXT_COLOR_BLUE + "\n\thighlight <position>";
+        output = output + SET_TEXT_COLOR_MAGENTA  + " - highlight valid moves for piece at position 1";;
+        output = output + SET_TEXT_COLOR_BLUE + "\n\tmove <position 1> <position 2>" + SET_TEXT_COLOR_MAGENTA;
+        output = output + " - make a move from position 1 to position 2";
         output = output + SET_TEXT_COLOR_BLUE + "\n\tleave" + SET_TEXT_COLOR_MAGENTA + " - leave game";
         output = output + SET_TEXT_COLOR_BLUE + "\n\thelp" + SET_TEXT_COLOR_MAGENTA + " - output this list again" + RESET_TEXT_COLOR + "\n";
         return output;
