@@ -25,4 +25,6 @@ public interface GameDAO {
 
     public void setGameOver (int gameID, boolean isGameOver) throws DataAccessException;
 
+    String getUserFromColor (int gameID, ChessGame.TeamColor color) throws DataAccessException;
+
 }

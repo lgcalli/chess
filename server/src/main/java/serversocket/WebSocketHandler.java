@@ -131,7 +131,8 @@ public class WebSocketHandler {
         }
     }
 
-    private void makeMove (MakeMoveParameters parameters) throws IOException{
+    private void makeMove (MakeMoveParameters parameters) throws IOException {
+        ChessGame oldGame = parameters.game;
         try {
             boolean gameOver = gameDAO.getGameOver(parameters.gameID);
             if (gameOver){
@@ -177,7 +178,40 @@ public class WebSocketHandler {
 
         NotificationMessage notification = new NotificationMessage(s);
         connections.broadcastToInGame(parameters.visitorName, notification, parameters.gameID);
+
+        try {
+            String username = "";
+            if (parameters.game.isInStalemate(ChessGame.TeamColor.WHITE) || parameters.game.isInStalemate(ChessGame.TeamColor.BLACK)) {
+                NotificationMessage stalemate = new NotificationMessage("move resulted in stalemate");
+                connections.broadcastToInGameNoExclusion(stalemate, parameters.gameID);
+                gameDAO.setGameOver(parameters.gameID, true);
+            } else if (parameters.game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+                username = gameDAO.getUserFromColor(parameters.gameID, ChessGame.TeamColor.BLACK);
+                NotificationMessage checkmate = new NotificationMessage("move resulted in checkmate\t" + username + " wins!");
+                connections.broadcastToInGameNoExclusion(checkmate, parameters.gameID);
+                gameDAO.setGameOver(parameters.gameID, true);
+            } else if (parameters.game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+                username = gameDAO.getUserFromColor(parameters.gameID, ChessGame.TeamColor.WHITE);
+                NotificationMessage checkmate = new NotificationMessage("move resulted in checkmate \t –> \t" + username + " wins!");
+                connections.broadcastToInGameNoExclusion(checkmate, parameters.gameID);
+                gameDAO.setGameOver(parameters.gameID, true);
+            } else if (parameters.game.isInCheck(ChessGame.TeamColor.WHITE)){
+                username = gameDAO.getUserFromColor(parameters.gameID, ChessGame.TeamColor.WHITE);
+                NotificationMessage inCheck = new NotificationMessage(username + " is in check");
+                connections.broadcastToInGameNoExclusion(inCheck, parameters.gameID);
+            } else if (parameters.game.isInCheck(ChessGame.TeamColor.BLACK)){
+                username = gameDAO.getUserFromColor(parameters.gameID, ChessGame.TeamColor.BLACK);
+                NotificationMessage inCheck = new NotificationMessage(username + " is in check");
+                connections.broadcastToInGameNoExclusion(inCheck, parameters.gameID);
+            }
+        } catch (DataAccessException e) {
+            ErrorMessage error = new ErrorMessage("an error occurred");
+            parameters.session.getRemote().sendString(parameters.gson.toJson(error));
+        }
     }
+
+
+
 
     private String getUserInterfaceMove(ChessMove move){
         ChessPosition start = move.getStartPosition();

@@ -163,5 +163,30 @@ public class MySqlGameDAO implements GameDAO {
         updateGameBoard(gameID, game);
     }
 
+    public String getUserFromColor (int gameID, ChessGame.TeamColor color) throws DataAccessException {
+        var statement = "SELECT whiteUsername, blackUsername FROM game WHERE gameID = ?";
+        try (var conn = DatabaseManager.getConnection();
+             var ps = conn.prepareStatement(statement)) {
+            ps.setInt(1, gameID);
+            try (var rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String white = rs.getString("whiteUsername");
+                    String black = rs.getString("blackUsername");
+                    if (color.equals(ChessGame.TeamColor.WHITE)) {
+                        return white;
+                    } else if (color.equals(ChessGame.TeamColor.BLACK)) {
+                        return black;
+                    } else {
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(500, "Unable to fetch game: " + e.getMessage());
+        }
+    }
+
 
 }
