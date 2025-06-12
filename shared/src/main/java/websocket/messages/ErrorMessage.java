@@ -8,4 +8,8 @@ public class ErrorMessage extends ServerMessage {
         this.errorMessage = errorMessage;
     }
 
+    @Override
+    public String toString() {
+        return "Error: " + errorMessage;
+    }
 }

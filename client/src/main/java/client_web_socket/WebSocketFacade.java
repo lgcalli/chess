@@ -1,5 +1,5 @@
 package client_web_socket;
-
+import static websocket.messages.ServerMessage.ServerMessageType.*;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import websocket.commands.*;
@@ -9,6 +9,7 @@ import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+
 
 //need to extend Endpoint for websocket to work properly
 public class WebSocketFacade extends Endpoint {
@@ -28,7 +29,15 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
+                    Gson gson = new Gson();
+                    ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
+                    ServerMessage.ServerMessageType serverMessageType = serverMessage.getServerMessageType();
+                    ServerMessage notification = null;
+                    switch (serverMessageType) {
+                        case LOAD_GAME -> notification  = gson.fromJson(message, LoadGameMessage.class);
+                        case NOTIFICATION -> notification  = gson.fromJson(message, NotificationMessage.class);
+                        case ERROR -> notification  = gson.fromJson(message, ErrorMessage.class);
+                    };
                     notificationHandler.notify(notification);
                 }
             });

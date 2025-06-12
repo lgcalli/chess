@@ -9,6 +9,7 @@ import exception.ResponseException;
 import websocket.commands.ConnectCommand;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -32,13 +33,10 @@ public class Gameplay implements NotificationHandler {
         this.authToken = authToken;
         this.color = color;
         this.gameID = gameID;
-        this.game = new ChessGame();
         this.serverUrl = serverUrl;
     }
 
     public void run() {
-        System.out.print(help());
-        System.out.print(this.drawBoard(color, null, 1000, 1000));
         var result = "";
         try {
             ws = new WebSocketFacade(serverUrl, this);
@@ -54,7 +52,7 @@ public class Gameplay implements NotificationHandler {
             System.out.print(SET_TEXT_COLOR_RED + msg);
         }
         while (!result.equals("leave")){
-            printPrompt();
+
             String line = scanner.nextLine();
             try {
                 result = eval(line);
@@ -63,6 +61,7 @@ public class Gameplay implements NotificationHandler {
                 var msg = e.toString();
                 System.out.print(SET_TEXT_COLOR_RED + msg);
             }
+            printPrompt();
         }
     }
 
@@ -293,7 +292,14 @@ public class Gameplay implements NotificationHandler {
 
     @Override
     public void notify(ServerMessage notification) {
-        System.out.println(SET_TEXT_COLOR_RED + notification);
-        printPrompt();
+        if (notification.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+            LoadGameMessage loadGameMessage = (LoadGameMessage) notification;
+            this.game = loadGameMessage.getGame();
+            System.out.println(this.drawBoard(color, null, 1000, 1000));
+            printPrompt();
+        } else {
+            System.out.println(SET_TEXT_COLOR_RED + notification.toString());
+            printPrompt();
+        }
     }
 }

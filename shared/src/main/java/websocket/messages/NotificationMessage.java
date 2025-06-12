@@ -1,5 +1,6 @@
 package websocket.messages;
 
+import com.google.gson.Gson;
 import websocket.commands.UserGameCommand;
 
 public class NotificationMessage extends ServerMessage{
@@ -10,4 +11,8 @@ public class NotificationMessage extends ServerMessage{
         this.message = message;
     }
 
+    @Override
+    public String toString() {
+        return "Notification: " + message;
+    }
 }

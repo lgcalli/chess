@@ -12,6 +12,7 @@ import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import dataaccess.*;
+import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -43,10 +44,10 @@ public class WebSocketHandler {
                 int gameID = command.getGameID();
                 try {
                     if (authDAO.getUser(visitorName) == null) {
-                        ErrorMessage newErrorMessage = new ErrorMessage("Error: user not found");
+                        ErrorMessage newErrorMessage = new ErrorMessage("user not found");
                         session.getRemote().sendString(gson.toJson(newErrorMessage));
                     } else if (gameDAO.getGame(gameID) == null) {
-                        ErrorMessage newErrorMessage = new ErrorMessage("Error: game not found");
+                        ErrorMessage newErrorMessage = new ErrorMessage("game not found");
                         session.getRemote().sendString(gson.toJson(newErrorMessage));
                     } else {
                         ChessGame game = gameDAO.getGame(gameID);
@@ -55,11 +56,12 @@ public class WebSocketHandler {
                         Gson gsonMessage = new Gson();
                         String loadGameJson = gsonMessage.toJson(loadGameMessage);
                         session.getRemote().sendString(loadGameJson);
-                        NotificationMessage notification = new NotificationMessage(visitorName + " has joined the game.");
+                        String username = authDAO.getUser(visitorName);
+                        NotificationMessage notification = new NotificationMessage(username + " has joined the game.");
                         connections.broadcastToInGame(visitorName, notification, gameID);
                     }
                 } catch (DataAccessException e){
-                    ErrorMessage error = new ErrorMessage("Error: server data access failure");
+                    ErrorMessage error = new ErrorMessage("server data access failure");
                     session.getRemote().sendString(gson.toJson(error));
                 }
             }
@@ -70,35 +72,32 @@ public class WebSocketHandler {
                 ChessMove move = moveCommand.getMove();
                 ChessGame game = null;
 
-                System.out.println(visitorName);
-                System.out.println(gameID);
-
                 try {
                     String username = authDAO.getUser(visitorName);
                     if (username == null) {
-                        ErrorMessage newErrorMessage = new ErrorMessage("Error: user not found");
+                        ErrorMessage newErrorMessage = new ErrorMessage("user not found");
                         session.getRemote().sendString(gson.toJson(newErrorMessage));
                         return;
                     } else if (gameDAO.getGame(gameID) == null) {
-                        ErrorMessage newErrorMessage = new ErrorMessage("Error: game not found");
+                        ErrorMessage newErrorMessage = new ErrorMessage("game not found");
                         session.getRemote().sendString(gson.toJson(newErrorMessage));
                         return;
                     }
                     game = gameDAO.getGame(gameID);
                     ChessGame.TeamColor color = gameDAO.getPlayerColor(gameID, username);
                     if (game.getBoard().getPiece(move.getStartPosition()).getTeamColor() != color){
-                        ErrorMessage newErrorMessage = new ErrorMessage("Error: unable to move piece");
+                        ErrorMessage newErrorMessage = new ErrorMessage("unable to move piece");
                         session.getRemote().sendString(gson.toJson(newErrorMessage));
                         return;
                     }
                     Collection<ChessMove> validMoves = game.validMoves(move.getStartPosition());
                     if (!validMoves.contains(move)){
-                        ErrorMessage error = new ErrorMessage("Error: invalid move");
+                        ErrorMessage error = new ErrorMessage("invalid move");
                         session.getRemote().sendString(gson.toJson(error));
                         return;
                     }
                 } catch (DataAccessException e) {
-                    ErrorMessage error = new ErrorMessage("Error: server data access failure");
+                    ErrorMessage error = new ErrorMessage("could not make move");
                     session.getRemote().sendString(gson.toJson(error));
                     return;
                 }
@@ -106,14 +105,19 @@ public class WebSocketHandler {
                     game.makeMove(move);
                     gameDAO.updateGameBoard(gameID, game);
                 } catch (Exception e) {
-                    ErrorMessage error = new ErrorMessage("Error: Server data access failure");
+                    ErrorMessage error = new ErrorMessage("not your turn");
                     session.getRemote().sendString(gson.toJson(error));
                     return;
                 }
                 LoadGameMessage loadGameMessage = new LoadGameMessage(game);
-                Gson gsonMessage = new Gson();
-                connections.broadcastToInGameNoExclusion(loadGameMessage, gameID); // pass `null` to include everyone
-                NotificationMessage notification = new NotificationMessage(visitorName + " made the move:" + getUserInterfaceMove(move));
+                connections.broadcastToInGameNoExclusion(loadGameMessage, gameID);
+                String username = "";
+                try {
+                   username = authDAO.getUser(visitorName);
+                } catch (DataAccessException e) {
+                    throw new RuntimeException(e);
+                }
+                NotificationMessage notification = new NotificationMessage(username + " made the move:" + getUserInterfaceMove(move));
                 connections.broadcastToInGame(visitorName, notification, gameID);
             }
             case LEAVE -> {
