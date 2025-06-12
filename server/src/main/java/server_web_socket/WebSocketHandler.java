@@ -1,11 +1,9 @@
 package server_web_socket;
 
 import chess.*;
-import exception.ResponseException;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import websocket.commands.LeaveCommand;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import com.google.gson.Gson;
@@ -13,7 +11,6 @@ import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import dataaccess.*;
-import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -68,7 +65,20 @@ public class WebSocketHandler {
                 Gson gsonMessage = new Gson();
                 String loadGameJson = gsonMessage.toJson(loadGameMessage);
                 session.getRemote().sendString(loadGameJson);
-                NotificationMessage notification = new NotificationMessage(username + " has joined the game");
+                ChessGame.TeamColor color = null;
+                try {
+                    color = gameDAO.getPlayerColor(gameID, username);
+                } catch (DataAccessException e) {
+                    ErrorMessage error = new ErrorMessage("could not join game");
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
+                }
+                NotificationMessage notification = null;
+                if (color == null){
+                    notification = new NotificationMessage(username + " is observing the game");
+                } else {
+                    notification = new NotificationMessage(username + " has joined the game");
+                }
                 connections.broadcastToInGame(visitorName, notification, gameID);
             }
             case MAKE_MOVE -> {
@@ -77,7 +87,7 @@ public class WebSocketHandler {
 
                 try {
                     boolean gameOver = gameDAO.getGameOver(gameID);
-                    if (gameDAO.getGameOver(gameID)){
+                    if (gameOver){
                         ErrorMessage newErrorMessage = new ErrorMessage("game is over, cannot make any more moves");
                         session.getRemote().sendString(gson.toJson(newErrorMessage));
                         return;

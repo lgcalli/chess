@@ -7,6 +7,7 @@ import chess.ChessPosition;
 import client_web_socket.*;
 import exception.ResponseException;
 import websocket.commands.ConnectCommand;
+import websocket.commands.LeaveCommand;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.LoadGameMessage;
@@ -158,7 +159,13 @@ public class Gameplay implements NotificationHandler {
     }
 
     String leave () throws ResponseException {
-
+        LeaveCommand command =  new LeaveCommand(authToken, gameID);
+        try {
+            ws.sendCommand(command);
+        } catch (Throwable e) {
+            var msg = e.toString();
+            System.out.print(SET_TEXT_COLOR_RED + msg);
+        }
         return "leave";
     }
 
