@@ -15,6 +15,9 @@ public class MySqlUserDAO implements UserDAO {
         String username = user.username();
         String password = user.password();
         String email = user.email();
+        if (username.isEmpty() || password.isEmpty() || email.isEmpty()){
+            throw new DataAccessException(400, "Invalid username, password, or email");
+        }
 
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 

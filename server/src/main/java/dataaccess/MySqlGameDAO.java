@@ -18,6 +18,9 @@ public class MySqlGameDAO implements GameDAO {
 
 
     public int createGame(String gameName) throws DataAccessException {
+        if (gameName.isEmpty()) {
+            throw new DataAccessException(400, "Invalid gameName");
+        }
         var statement = "INSERT INTO game (whiteUsername, blackUsername, gameName, json) VALUES (?, ?, ?, ?)";
         var json = new Gson().toJson(new ChessGame());
         return db.executeUpdate(statement, null, null, gameName, json);
@@ -142,6 +145,9 @@ public class MySqlGameDAO implements GameDAO {
     }
 
     public void leaveGame(int gameID, ChessGame.TeamColor color) throws DataAccessException {
+        if (getGame(gameID) == null) {
+            throw new DataAccessException(500, "Unable to get game");
+        }
         String statement = null;
         if (color == ChessGame.TeamColor.WHITE){
             statement = "UPDATE game SET whiteUsername = NULL WHERE gameID = ?";
