@@ -338,20 +338,7 @@ public class DataAccessUnitTests {
         int gameID = gameDAO.createGame("game");
         gameDAO.updateGame(gameID, "updateGameUser", ChessGame.TeamColor.WHITE);
         gameDAO.leaveGame(gameID, ChessGame.TeamColor.WHITE);
-        try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT whiteUsername FROM game WHERE gameName=?";
-            try (var ps = conn.prepareStatement(statement)) {
-                ps.setString(1, "game");
-                try (var rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        whiteUsername = rs.getString("whiteUsername");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new DataAccessException(500, String.format("Unable to read data: %s", e.getMessage()));
-        }
-        Assertions.assertNull(whiteUsername);
+        Assertions.assertNull(gameDAO.getUserFromColor(gameID, ChessGame.TeamColor.WHITE));
     }
 
     //leaveGame (Negative)
